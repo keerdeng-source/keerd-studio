@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法国 Crypto 代理数据库</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy: #1B2A4A;
+    --navy-light: #243558;
+    --cyan: #00C8D7;
+    --gold: #C9A84C;
+    --bg: #F5F6F8;
+    --surface: #FFFFFF;
+    --border: #E2E5EB;
+    --text: #1A1D23;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+
+    --tag-kol-bg: #E0F5F7; --tag-kol: #0E7490;
+    --tag-tool-bg: #FEF3C7; --tag-tool: #92400E;
+    --tag-whale-bg: #EEF2FF; --tag-whale: #3730A3;
+    --tag-grass-bg: #D1FAE5; --tag-grass: #065F46;
+
+    --pri-hi-bg: #D1FAE5; --pri-hi: #065F46;
+    --pri-md-bg: #FEF3C7; --pri-md: #92400E;
+    --pri-lo-bg: #FEE2E2; --pri-lo: #991B1B;
+
+    --badge-yt-bg: #FEE2E2; --badge-yt: #991B1B;
+    --badge-tg-bg: #DBEAFE; --badge-tg: #1E40AF;
+    --badge-x-bg:  #F3F4F6; --badge-x:  #374151;
+    --badge-multi-bg: #EDE9FE; --badge-multi: #5B21B6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--navy);
+    padding: 28px 40px 24px;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 2px solid var(--cyan);
+  }
+  .site-header h1 {
+    font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -0.3px;
+  }
+  .site-header p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+  /* ── TABS ── */
+  .tabs-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex; gap: 0; overflow-x: auto;
+  }
+  .tab-btn {
+    padding: 14px 20px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-muted);
+    background: none; border: none; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .tab-btn:hover { color: var(--navy); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--cyan); font-weight: 600; }
+  .tab-count {
+    display: inline-block; background: var(--border);
+    color: var(--text-muted); font-size: 10px; font-weight: 600;
+    padding: 1px 6px; border-radius: 10px; margin-left: 6px;
+  }
+  .tab-btn.active .tab-count { background: var(--cyan); color: var(--navy); }
+
+  /* ── PANEL ── */
+  .panel { display: none; padding: 28px 40px 60px; }
+  .panel.active { display: block; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 18px;
+  }
+  .filter-bar input, .filter-bar select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px; color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 12px; height: 34px;
+    outline: none; transition: border-color .15s;
+  }
+  .filter-bar input { width: 200px; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--cyan); }
+  .result-count { margin-left: auto; font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: #FFFBEB; border: 1px solid #FDE68A;
+    border-left: 3px solid #F59E0B;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; color: #78350F; margin-bottom: 18px;
+  }
+
+  /* ── TABLE ── */
+  .tbl-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); }
+  thead th {
+    background: var(--navy); color: #fff;
+    font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase;
+    padding: 11px 14px; text-align: left; white-space: nowrap;
+  }
+  thead th:first-child { border-radius: 10px 0 0 0; }
+  thead th:last-child  { border-radius: 0 10px 0 0; }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #F9FAFB; }
+  tbody td { padding: 11px 14px; vertical-align: top; }
+
+  tbody tr.hidden { display: none; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+    line-height: 1.6; margin: 1px 1px 1px 0;
+  }
+  .badge-yt    { background: var(--badge-yt-bg);    color: var(--badge-yt); }
+  .badge-tg    { background: var(--badge-tg-bg);    color: var(--badge-tg); }
+  .badge-x     { background: var(--badge-x-bg);     color: var(--badge-x); }
+  .badge-multi { background: var(--badge-multi-bg); color: var(--badge-multi); }
+  .badge-fr    { background: var(--tag-grass-bg);   color: var(--tag-grass); }
+  .badge-global{ background: var(--badge-x-bg);     color: var(--badge-x); }
+  .badge-cn    { background: var(--badge-multi-bg); color: var(--badge-multi); }
+  .badge-both  { background: var(--tag-kol-bg);     color: var(--tag-kol); }
+  .badge-rebate{ background: var(--tag-tool-bg);    color: var(--tag-tool); }
+  .badge-agg   { background: var(--tag-whale-bg);   color: var(--tag-whale); }
+  .badge-exch  { background: var(--tag-kol-bg);     color: var(--tag-kol); }
+  .badge-algo  { background: var(--badge-multi-bg); color: var(--badge-multi); }
+  .badge-prop  { background: var(--tag-tool-bg);    color: var(--tag-tool); }
+  .badge-vip   { background: var(--tag-whale-bg);   color: var(--tag-whale); }
+  .badge-comm  { background: var(--tag-grass-bg);   color: var(--tag-grass); }
+
+  .pri {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  }
+  .pri::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .pri-hi { background: var(--pri-hi-bg); color: var(--pri-hi); }
+  .pri-hi::before { background: #10B981; }
+  .pri-md { background: var(--pri-md-bg); color: var(--pri-md); }
+  .pri-md::before { background: #F59E0B; }
+  .pri-lo { background: var(--pri-lo-bg); color: var(--pri-lo); }
+  .pri-lo::before { background: #EF4444; }
+
+  .check-yes { color: #059669; font-weight: 600; }
+  .check-no  { color: var(--text-muted); }
+
+  .name-cell .main { font-weight: 600; font-size: 13px; color: var(--navy); }
+  .name-cell .sub  { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+  td .note { font-size: 11.5px; color: var(--text-muted); line-height: 1.55; max-width: 280px; }
+  td .contact { font-size: 11.5px; color: var(--text-muted); }
+  td .action  { font-size: 11.5px; color: var(--text); line-height: 1.55; max-width: 260px; }
+
+  /* ── ACTION LIST specific ── */
+  .action-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--navy); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .status-badge {
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+    border-radius: 6px; border: 1px solid var(--border);
+    color: var(--text-muted); background: #F9FAFB;
+  }
+
+  /* ── OVERVIEW CARDS ── */
+  .overview-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .ov-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 22px;
+    border-top: 3px solid transparent;
+  }
+  .ov-card:nth-child(1) { border-top-color: var(--tag-kol); }
+  .ov-card:nth-child(2) { border-top-color: var(--tag-tool); }
+  .ov-card:nth-child(3) { border-top-color: #5B21B6; }
+  .ov-card:nth-child(4) { border-top-color: var(--tag-grass); }
+  .ov-card .ov-type { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+  .ov-card .ov-count { font-size: 36px; font-weight: 300; color: var(--navy); font-family: 'DM Mono', monospace; line-height: 1; margin-bottom: 6px; }
+  .ov-card .ov-lead { font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .ov-card .ov-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+
+  .legend {
+    display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+    font-size: 11.5px; color: var(--text-muted);
+    padding: 14px 18px; background: #F9FAFB; border-radius: 8px; border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .legend strong { color: var(--text); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>🇫🇷 法国 Crypto 代理数据库</h1>
+  <p>2026 · 四类渠道整合总表</p>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('overview')">📋 总览</button>
+  <button class="tab-btn" onclick="switchTab('kol')">交易类KOL <span class="tab-count">10</span></button>
+  <button class="tab-btn" onclick="switchTab('tool')">工具类返佣 <span class="tab-count">8</span></button>
+  <button class="tab-btn" onclick="switchTab('whale')">大户 / Quant <span class="tab-count">8</span></button>
+  <button class="tab-btn" onclick="switchTab('grass')">地推 / 讲师 <span class="tab-count">8</span></button>
+</div>
+
+<!-- ═══════════════════════════════ OVERVIEW ═══════════════════════════════ -->
+<div id="panel-overview" class="panel active">
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="ov-type">类型一</div>
+      <div class="ov-count">10</div>
+      <div class="ov-lead">交易类 KOL</div>
+      <div class="ov-desc">Telegram私域为主。Kasper Trading已有broker IB返佣闭环，InvestX 120K社区，Julien Roman Club X付费私域。首要联系渠道：Telegram直接DM。</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-type">类型二</div>
+      <div class="ov-count">8</div>
+      <div class="ov-lead">工具类返佣平台</div>
+      <div class="ov-desc">专业返佣平台（backcom）可作为合作基础设施；法国本地聚合（codedeparrainage.fr）负责流量曝光。Bybit EU 2025年7月MiCA合规，法国最合规大型交易所。</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-type">类型三</div>
+      <div class="ov-count">8</div>
+      <div class="ov-lead">大户 / Quant / 高API</div>
+      <div class="ov-desc">不能用广告触达，需靠技术内容建立信任。Freqtrade Discord是Python algo trader聚集地；Cercle PPM + FTMO是已验证专业trader的核心圈子。</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-type">类型四</div>
+      <div class="ov-count">8</div>
+      <div class="ov-lead">地推 / 讲师 / 私域运营</div>
+      <div class="ov-desc">法语市场以'formation'形式合法运营。ALTI Trading 145K成员，已有affiliate计划和电话销售团队。华人私域无公开入口，只能靠人脉引荐。</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <strong>优先级说明：</strong>
+    <span><span class="pri pri-hi">高</span> </span>
+    <span><span class="pri pri-md">中</span> </span>
+    <span><span class="pri pri-lo">低</span> </span>
+    <strong style="margin-left:16px">数据截止：</strong><span>2026年4月</span>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>类型</th><th>代表渠道</th><th>核心价值</th><th>首要联系方式</th><th>优先级</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-yt" style="background:var(--tag-kol-bg);color:var(--tag-kol)">类型1 KOL</span></td>
+          <td class="name-cell"><div class="main">Kasper Trading · InvestX · Julien Roman</div></td>
+          <td class="note">私域Telegram群，已有broker IB返佣闭环，用户是主动交易的新手/中级</td>
+          <td class="contact">@KasperContact · @Investxsupport</td>
+          <td><span class="pri pri-hi">高</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-rebate">类型2 工具</span></td>
+          <td class="name-cell"><div class="main">backcom · Bybit EU</div></td>
+          <td class="note">专业返佣平台作为合作基础设施；Bybit EU是目前法国最合规大型交易所</td>
+          <td class="contact">backcom.app · bybit.com/partners</td>
+          <td><span class="pri pri-hi">高</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-vip">类型3 大户</span></td>
+          <td class="name-cell"><div class="main">Freqtrade Discord · Cercle PPM · FTMO</div></td>
+          <td class="note">已验证有策略的专业trader，手续费极度敏感，需技术内容切入</td>
+          <td class="contact">discord.gg/freqtrade · cercleppm.fr</td>
+          <td><span class="pri pri-hi">高</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-comm">类型4 讲师</span></td>
+          <td class="name-cell"><div class="main">ALTI Trading · Stradoji · Kasper销售团队</div></td>
+          <td class="note">145K成员formation平台，已有affiliate计划和电话销售团队主动获客</td>
+          <td class="contact">alti-trading.fr/partenaires · +33 9 71 08 10 15</td>
+          <td><span class="pri pri-hi">高</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ KOL ═══════════════════════════════ -->
+<div id="panel-kol" class="panel">
+  <div class="filter-bar">
+    <input type="text" id="kol-q" placeholder="搜索名称 / 关键词…" oninput="filterTable('kol')">
+    <select id="kol-plat" onchange="filterTable('kol')">
+      <option value="">全部平台</option>
+      <option value="YouTube">YouTube</option>
+      <option value="Telegram">Telegram</option>
+      <option value="多平台">多平台</option>
+    </select>
+    <select id="kol-broker" onchange="filterTable('kol')">
+      <option value="">Broker合作状态</option>
+      <option value="已有合作">已有合作</option>
+      <option value="有迹象">有迹象</option>
+      <option value="未披露">未披露</option>
+      <option value="自有平台">自有平台</option>
+    </select>
+    <select id="kol-pri" onchange="filterTable('kol')">
+      <option value="">全部优先级</option>
+      <option value="高">高</option>
+      <option value="中">中</option>
+    </select>
+    <span class="result-count" id="kol-count">10 条</span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="tbl-kol">
+      <thead><tr>
+        <th>名称</th><th>主平台</th><th>粉丝规模</th><th>内容方向</th>
+        <th>私域社群 & 收费模式</th><th>已有Broker/交易所合作</th>
+        <th>联系方式</th><th>优先级</th><th>备注</th>
+      </tr></thead>
+      <tbody>
+
+<tr data-q="Kasper Trading 多平台 交易信号 高 已有合作">
+  <td class="name-cell"><div class="main">Kasper Trading</div><div class="sub">tradingkasper.com</div></td>
+  <td><span class="badge badge-multi">多平台</span></td>
+  <td>300K+ 全平台<br>15K训练成员</td>
+  <td>交易信号</td>
+  <td class="note">Telegram私域群（付费 or 经纪商返佣入群）<br>培训 €2500 终身</td>
+  <td><span class="check-yes">✅ 已有合作</span><br><span class="contact">VT Markets · Axi · PU Prime · Vantage（IB返佣）</span></td>
+  <td class="contact">@KasperContact (TG)<br>tradingkasper.com</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">已跑通broker CPA/IB返佣商业闭环。直接对标你的产品模式，合作切入点最顺滑</td>
+</tr>
+
+<tr data-q="InvestX Roro Vevo Telegram 交易信号 高 已有合作">
+  <td class="name-cell"><div class="main">InvestX (Roro Vevo)</div><div class="sub">investx.fr</div></td>
+  <td><span class="badge badge-tg">Telegram</span></td>
+  <td>120K+ Telegram公开频道</td>
+  <td>交易信号</td>
+  <td class="note">免费公开频道 + 私域群<br>（broker affiliation免费入）<br>App: pro.investx.gg</td>
+  <td><span class="check-yes">✅ 已有合作</span><br><span class="contact">FxLift · 多个broker affiliation</span></td>
+  <td class="contact">@Investxsupport (TG)<br>investx.fr 联系表单</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">完整affiliation闭环，120K社区规模大，对新exchange合作开放。有支持团队（Matthieu等）</td>
+</tr>
+
+<tr data-q="Julien Roman YouTube 教学信号 高 有迹象">
+  <td class="name-cell"><div class="main">Julien Roman</div><div class="sub">julienroman.com</div></td>
+  <td><span class="badge badge-yt">YouTube</span></td>
+  <td>450K YT · 1.6M views/月</td>
+  <td>教学+信号</td>
+  <td class="note">Club X（付费私域，约300+成员，申请制）<br>newsletter L'Oeil Crypto</td>
+  <td><span class="check-no">有迹象</span><br><span class="contact">affiliate links页，具体exchange未公开</span></td>
+  <td class="contact">julienroman.com<br>X: @JulienROMAN13<br>LinkedIn</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">Club X付费私域，中级/严肃投资者。联系优先走官网或LinkedIn。每月1.6M视频观看</td>
+</tr>
+
+<tr data-q="Crypto Trading France Telegram 交易信号 高 已有合作">
+  <td class="name-cell"><div class="main">Crypto Trading France</div><div class="sub">cryptotradingfr.com</div></td>
+  <td><span class="badge badge-tg">Telegram</span></td>
+  <td>法语专属，运营自2018</td>
+  <td>交易信号</td>
+  <td class="note">Telegram群（信号+算法+培训）<br>覆盖Binance/BitMEX/KuCoin</td>
+  <td><span class="check-yes">✅ 已有合作</span><br><span class="contact">Binance · BitMEX · KuCoin · Bibox</span></td>
+  <td class="contact">cryptotradingfr.com 联系表单</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">老牌法国crypto信号平台（2018起），已打通多个主流交易所，合作模式成熟</td>
+</tr>
+
+<tr data-q="Hasheur Owen Simonin 多平台 科普教育 中 自有平台">
+  <td class="name-cell"><div class="main">Hasheur (Owen Simonin)</div><div class="sub">meria.com</div></td>
+  <td><span class="badge badge-multi">多平台</span></td>
+  <td>772K YT · 1.5M+ 累计<br>100K Meria用户</td>
+  <td>科普教育</td>
+  <td class="note">自有平台 Meria.com<br>（AMF注册PSAN，staking/lending）<br>不依赖Telegram群</td>
+  <td><span class="check-no">自有平台</span><br><span class="contact">Meria（已与Ledger合作）· AMF PSAN E2021-016</span></td>
+  <td class="contact">meria.com → 联系页<br>LinkedIn: Owen Simonin</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">有自己的exchange生态（Meria），合作需以品牌sponsorship切入，代理模式不适用</td>
+</tr>
+
+<tr data-q="BeInCrypto France Telegram 教学信号 中 有迹象">
+  <td class="name-cell"><div class="main">BeInCrypto France</div><div class="sub">fr.beincrypto.com</div></td>
+  <td><span class="badge badge-tg">Telegram</span></td>
+  <td>全球10M用户<br>法语Telegram社区</td>
+  <td>教学+信号</td>
+  <td class="note">Telegram法语社区 (t.me/BeInCryptoFR)<br>信号+资讯+教育</td>
+  <td><span class="check-no">有迹象</span><br><span class="contact">多个exchange affiliate（全球版本已有）</span></td>
+  <td class="contact">fr.beincrypto.com 合作/联系页</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">媒体属性强，法语社区覆盖广，已有全球affiliate架构。适合媒体级推广合作</td>
+</tr>
+
+<tr data-q="Kasper Trading SMC YouTube 交易信号 高 已有合作">
+  <td class="name-cell"><div class="main">Kasper Trading (SMC YouTube)</div><div class="sub">tradingkasper.com</div></td>
+  <td><span class="badge badge-yt">YouTube</span></td>
+  <td>200K+ YT · 4000 活跃私域成员</td>
+  <td>交易信号</td>
+  <td class="note">Telegram私域群（付费 or broker entry）</td>
+  <td><span class="check-yes">✅ 已有合作</span><br><span class="contact">VT Markets · Axi · PU Prime</span></td>
+  <td class="contact">tradingkasper.com</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">YouTube版Kasper，SMC方法论，私域Telegram付费。同上Kasper Trading条目</td>
+</tr>
+
+<tr data-q="CryptoMatrix 多平台 科普教育 中 未披露">
+  <td class="name-cell"><div class="main">CryptoMatrix</div></td>
+  <td><span class="badge badge-multi">多平台</span></td>
+  <td>135K YT · 230K X</td>
+  <td>科普教育</td>
+  <td class="note">Twitter社群为主，无独立付费私域</td>
+  <td><span class="check-no">未披露</span></td>
+  <td class="contact">YouTube / X: @CryptoMatrix</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">早期比特币矿工，面向初学者，教程为主，适合引流新手注册</td>
+</tr>
+
+<tr data-q="Token Invaders Mr TK 多平台 交易信号 中 未披露">
+  <td class="name-cell"><div class="main">Token Invaders (Mr.TK)</div></td>
+  <td><span class="badge badge-multi">多平台</span></td>
+  <td>42K YT · Twitter活跃</td>
+  <td>交易信号</td>
+  <td class="note">Twitter社群为主</td>
+  <td><span class="check-no">未披露</span></td>
+  <td class="contact">YouTube/Twitter 公开联系</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">矿工转交易，技术分析+项目真伪识别，信任度高</td>
+</tr>
+
+<tr data-q="Crypto Futur 多平台 教学信号 中 未披露">
+  <td class="name-cell"><div class="main">Crypto Futur</div></td>
+  <td><span class="badge badge-multi">多平台</span></td>
+  <td>中量级 (YouTube + X活跃)</td>
+  <td>教学+信号</td>
+  <td class="note">Twitter社群为主</td>
+  <td><span class="check-no">未披露</span></td>
+  <td class="contact">Twitter: @CryptoFutur</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">技术分析+基本面双覆盖，每日发布，适合测试小规模affiliate合作</td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOOL ═══════════════════════════════ -->
+<div id="panel-tool" class="panel">
+  <div class="filter-bar">
+    <input type="text" id="tool-q" placeholder="搜索名称 / 关键词…" oninput="filterTable('tool')">
+    <select id="tool-type" onchange="filterTable('tool')">
+      <option value="">全部类型</option>
+      <option value="专业返佣">专业返佣平台</option>
+      <option value="本地聚合">法国本地聚合</option>
+      <option value="官方返佣">交易所官方返佣</option>
+    </select>
+    <select id="tool-pri" onchange="filterTable('tool')">
+      <option value="">全部优先级</option>
+      <option value="高">高</option>
+      <option value="中">中</option>
+      <option value="低">低</option>
+    </select>
+    <span class="result-count" id="tool-count">8 条</span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="tbl-tool">
+      <thead><tr>
+        <th>平台名称</th><th>类型</th><th>法国渗透</th><th>返佣比例</th>
+        <th>支持交易所</th><th>商业模式</th><th>联系 / 合作入口</th><th>优先级</th><th>备注</th>
+      </tr></thead>
+      <tbody>
+
+
+<tr data-q="backcom 专业返佣 高">
+  <td class="name-cell"><div class="main">backcom.app / backcom.io</div></td>
+  <td><span class="badge badge-rebate">专业返佣</span></td>
+  <td><span class="badge badge-global">无法语/全球</span></td>
+  <td><strong>25–60%</strong> · Bybit最高50%</td>
+  <td class="note">Binance · Bybit · OKX · MEXC · KuCoin · BingX · Exness · XM · IC Markets 等</td>
+  <td class="note">IB返佣 · 用户绑定UID激活 · 自动日结/周结 · 有dashboard追踪</td>
+  <td class="contact">backcom.app 官网表单<br>Telegram support</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">越南团队，全球化运营，界面专业。IB佣金直接给用户，平台零收费。有合作项目咨询入口</td>
+</tr>
+
+<tr data-q="Bybit EU 官方返佣 高">
+  <td class="name-cell"><div class="main">Bybit EU 官方Affiliate</div></td>
+  <td><span class="badge badge-exch">官方返佣</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法语支持</span></td>
+  <td><strong>标准最高45%</strong><br>新用户bonus最高$30K</td>
+  <td class="note">Bybit EU（MiCA合规版）</td>
+  <td class="note">2025年7月起MiCA合规 · AMF白名单 · 可合法推广给法国用户</td>
+  <td class="contact">bybit.com/en/partners/affiliate/<br>官方合作页</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">2025年7月Bybit EU完成MiCA合规并进入AMF白名单，是目前法国最合规可推广的大型交易所</td>
+</tr>
+
+<tr data-q="HighFxRebates HFR 专业返佣 中">
+  <td class="name-cell"><div class="main">HighFxRebates (HFR)</div></td>
+  <td><span class="badge badge-rebate">专业返佣</span></td>
+  <td><span class="badge badge-global">无法语/全球</span></td>
+  <td><strong>23%</strong> Bybit · Forex+Crypto</td>
+  <td class="note">Bybit · Binance · JustMarkets · XM · HFM · RoboForex 等</td>
+  <td class="note">IB返佣 · 周结 · 2008年起运营 · PipRebate前身</td>
+  <td class="contact">highfxrebates.com<br>TG: @highfxrebates_support</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">老牌平台（2008），信誉好，主力在Forex，crypto是副业。无法语支持，适合Forex+crypto复合交易者</td>
+</tr>
+
+<tr data-q="Binance 官方返佣 中">
+  <td class="name-cell"><div class="main">Binance 官方Affiliate计划</div></td>
+  <td><span class="badge badge-exch">官方返佣</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法语支持</span></td>
+  <td><strong>最高20%</strong> parrain<br>filleul减20%</td>
+  <td class="note">Binance（全产品线）</td>
+  <td class="note">直接与Binance签约 · Pro模式：parrain拿20%佣金 · Lite模式：filleul得100USDT券</td>
+  <td class="contact">binance.com/en/activity/affiliate<br>官方合作入口</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">Binance直签affiliate program，法语界面，法国用户多。AMF合规限制部分产品</td>
+</tr>
+
+<tr data-q="codedeparrainage 本地聚合 中">
+  <td class="name-cell"><div class="main">codedeparrainage.fr</div></td>
+  <td><span class="badge badge-agg">本地聚合</span></td>
+  <td><span class="badge badge-fr">🇫🇷 本土平台</span></td>
+  <td>Binance -20%<br>OKX -20% · Bybit -10%</td>
+  <td class="note">Binance · Bybit · OKX · Crypto.com · MEXC · KuCoin 等主流</td>
+  <td class="note">法国读者导流型媒体 · 持有各交易所最高比例parrainage code · 从交易所拿IB commission</td>
+  <td class="contact">codedeparrainage.fr<br>无专属商务联系</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">法国最专业的crypto parrainage媒体，内容质量高，受众为法国新手。可接触洽谈co-affiliation</td>
+</tr>
+
+<tr data-q="super-parrain 本地聚合 中">
+  <td class="name-cell"><div class="main">super-parrain.com</div></td>
+  <td><span class="badge badge-agg">本地聚合</span></td>
+  <td><span class="badge badge-fr">🇫🇷 本土平台</span></td>
+  <td>取决于交易所规则</td>
+  <td class="note">Binance · Meria · Bitpanda · Crypto.com 等</td>
+  <td class="note">法国用户P2P parrainage聚合 · 连接parrain和filleul · 不直接参与返佣分成</td>
+  <td class="contact">super-parrain.com · 站内联系</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">法国最大parrainage聚合平台之一，Similarweb排名全球~193K。适合作为曝光渠道</td>
+</tr>
+
+<tr data-q="codes-parrain 本地聚合 低">
+  <td class="name-cell"><div class="main">codes-parrain.com</div></td>
+  <td><span class="badge badge-agg">本地聚合</span></td>
+  <td><span class="badge badge-fr">🇫🇷 本土平台</span></td>
+  <td>Binance -20% 等标准</td>
+  <td class="note">Binance · OKX · Crypto.com · Revolut 等（混合，非crypto专注）</td>
+  <td class="note">社区UGC parrainage代码分享 · 用户自发发布code · 网站从affiliate赚收入</td>
+  <td class="contact">codes-parrain.com 联系表单</td>
+  <td><span class="pri pri-lo">低</span></td>
+  <td class="note">通用parrainage平台，覆盖银行/telecom/crypto，非专注crypto，适合做广泛曝光</td>
+</tr>
+
+<tr data-q="1parrainage 本地聚合 低">
+  <td class="name-cell"><div class="main">1parrainage.com</div></td>
+  <td><span class="badge badge-agg">本地聚合</span></td>
+  <td><span class="badge badge-fr">🇫🇷 本土平台</span></td>
+  <td>标准交易所parrainage</td>
+  <td class="note">Meria · Binance 等</td>
+  <td class="note">法国最大parrainage平台（1500+品牌）· P2P导流 · 用户自发分享</td>
+  <td class="contact">1parrainage.com</td>
+  <td><span class="pri pri-lo">低</span></td>
+  <td class="note">法国最大通用parrainage平台，覆盖面广但crypto比例低，用于提升法国整体可见度</td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ WHALE ═══════════════════════════════ -->
+<div id="panel-whale" class="panel">
+  <div class="filter-bar">
+    <input type="text" id="whale-q" placeholder="搜索渠道 / 关键词…" oninput="filterTable('whale')">
+    <select id="whale-type" onchange="filterTable('whale')">
+      <option value="">全部类型</option>
+      <option value="Algo">Algo/Quant社区</option>
+      <option value="Prop">Prop Firm渠道</option>
+      <option value="VIP">VIP/大户计划</option>
+      <option value="社区">法语技术社区</option>
+    </select>
+    <select id="whale-pri" onchange="filterTable('whale')">
+      <option value="">全部优先级</option>
+      <option value="高">高</option>
+      <option value="中">中</option>
+      <option value="低">低</option>
+    </select>
+    <span class="result-count" id="whale-count">8 条</span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="tbl-whale">
+      <thead><tr>
+        <th>渠道 / 平台</th><th>类型</th><th>法国渗透</th><th>目标用户特征</th>
+        <th>规模估计</th><th>触达方式</th><th>优先级</th><th>操作建议</th>
+      </tr></thead>
+      <tbody>
+
+<tr data-q="Freqtrade Discord Algo 高">
+  <td class="name-cell"><div class="main">Freqtrade Discord</div><div class="sub">discord.gg/freqtrade</div></td>
+  <td><span class="badge badge-algo">Algo/Quant</span></td>
+  <td><span class="badge badge-global">全球（含法国用户）</span></td>
+  <td class="note">自己写Python策略、用CCXT对接交易所API的开发者型交易者，有真实资金</td>
+  <td>30,000+ Discord成员（全球）</td>
+  <td class="note">加入Discord → 在#general或#strategies频道发布分析内容 → 建立技术信任 → 私信</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">全球最活跃开源crypto bot社区。法国用户约10-15%（估）。最适合用技术内容做引流</td>
+</tr>
+
+<tr data-q="CryptoFR 社区 法国 高">
+  <td class="name-cell"><div class="main">CryptoFR.com</div><div class="sub">cryptofr.com</div></td>
+  <td><span class="badge badge-comm">法语社区</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法国本土</span></td>
+  <td class="note">中高级法语crypto用户，含技术分析爱好者、bot开发者、长期持有者</td>
+  <td>法国最大crypto论坛，活跃用户数千</td>
+  <td class="note">注册账号 → 在'交易/技术'版块贡献内容 → 签名/帖子含联系方式</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">法国最大中文crypto论坛，已有bot开发讨论。技术内容切入效率最高</td>
+</tr>
+
+<tr data-q="FTMO 法国 Prop 高">
+  <td class="name-cell"><div class="main">FTMO法国用户群体</div><div class="sub">ftmo.com/fr · discord.gg/ftmo</div></td>
+  <td><span class="badge badge-prop">Prop Firm</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法国强渗透</span></td>
+  <td class="note">通过了prop firm challenge的专业trader，有稳定策略，管理$10K–$200K账户</td>
+  <td>法国数千名FTMO用户（2024年法语服务已完整）</td>
+  <td class="note">FTMO Discord社区 / 法国prop firm相关KOL（如cercleppm.fr）/ TradingView法语社区</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">通过FTMO challenge的人=已验证的有策略的真实trader。手续费极度敏感，Kasper私域里已有大量这类用户</td>
+</tr>
+
+<tr data-q="Cercle PPM Prop 法国 高">
+  <td class="name-cell"><div class="main">Cercle PPM / Prop Firm社区</div><div class="sub">cercleppm.fr</div></td>
+  <td><span class="badge badge-prop">Prop Firm</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法国本土</span></td>
+  <td class="note">法国prop firm参与者，通过了challenge的专业trader，有ICT/SMC策略</td>
+  <td>cercleppm.fr + Kasper Trading学员重叠社群</td>
+  <td class="note">cercleppm.fr论坛 / Kasper Trading私域（已有大量propfirm用户）</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">法国最专业的prop firm教育平台，和Kasper Trading用户高度重叠。最高价值的潜在代理</td>
+</tr>
+
+<tr data-q="TradingView 社区 中">
+  <td class="name-cell"><div class="main">TradingView法语社区</div><div class="sub">tradingview.com</div></td>
+  <td><span class="badge badge-comm">法语社区</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法语强渗透</span></td>
+  <td class="note">技术分析师、PineScript开发者、使用TradingView API的中高级交易者</td>
+  <td>法语社区数万用户（TradingView全球7M+）</td>
+  <td class="note">在TradingView发布公开策略/脚本 → 建立技术权威 → 个人主页引流</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">法国技术交易者最常用的平台。通过发布优质法语Pine Script策略建立关注者基础</td>
+</tr>
+
+<tr data-q="Hummingbot CCXT Algo 中">
+  <td class="name-cell"><div class="main">Hummingbot / CCXT社区</div><div class="sub">discord.gg/hummingbot · github.com/ccxt</div></td>
+  <td><span class="badge badge-algo">Algo/Quant</span></td>
+  <td><span class="badge badge-global">全球（含法国开发者）</span></td>
+  <td class="note">用CCXT/Hummingbot做多交易所套利、做市商、高频交易的开发者，自建API调用</td>
+  <td>Hummingbot Discord 10K+ / CCXT GitHub 32K+ stars</td>
+  <td class="note">GitHub Issues / Hummingbot Discord → 技术内容切入 → 展示API优势</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">最典型的'自己写代码交易'的大户。广告完全无效，只能用技术文档/API demo切入</td>
+</tr>
+
+
+<tr data-q="Binance Bybit VIP 中">
+  <td class="name-cell"><div class="main">Binance / Bybit VIP计划</div><div class="sub">bybit.com/en/vip · binance.com/en/vip</div></td>
+  <td><span class="badge badge-vip">VIP大户</span></td>
+  <td><span class="badge badge-fr">有法语支持</span></td>
+  <td class="note">月交易量$1M+的VIP用户，Bybit VIP3+/Binance VIP2+，已有专属客户经理</td>
+  <td>Bybit EU法国VIP用户未披露，估百-千级</td>
+  <td class="note">通过Bybit/Binance官方VIP经理介绍 → 通过IB program合规转介</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">这类用户已在最大交易所有VIP待遇，需差异化价值吸引。竞争壁垒高，需差异化价值</td>
+</tr>
+
+<tr data-q="Forum Finance 社区 低">
+  <td class="name-cell"><div class="main">Forum Finance (Discord)</div><div class="sub">discord.com/invite/forumfinance</div></td>
+  <td><span class="badge badge-comm">法语社区</span></td>
+  <td><span class="badge badge-fr">🇫🇷 法语</span></td>
+  <td class="note">法国综合性财经投资社区，含crypto、股票、房产，部分高净值投资者</td>
+  <td>discord.com/invite/forumfinance</td>
+  <td class="note">加入Discord → 在crypto频道分享专业内容 → 私信高活跃成员</td>
+  <td><span class="pri pri-lo">低</span></td>
+  <td class="note">覆盖面广但精准度低，crypto只是其中一块。适合早期品牌曝光</td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ GRASS ═══════════════════════════════ -->
+<div id="panel-grass" class="panel">
+  <div class="insight">⚠️ <strong>关键限制：</strong>法国AMF监管严格，无注册的"带单/喊单"服务在法语市场属于违法。法语公开渠道里的运营者都以"formation/教育"包装；<strong>真正的"电话销售+带单群"主要存在于华人圈私域（微信/WhatsApp），无法通过公开搜索找到</strong>——只能靠社群内部推荐触达。</div>
+  <div class="filter-bar">
+    <input type="text" id="grass-q" placeholder="搜索名称 / 关键词…" oninput="filterTable('grass')">
+    <select id="grass-market" onchange="filterTable('grass')">
+      <option value="">全部市场</option>
+      <option value="法语公开">法语公开市场</option>
+      <option value="华人私域">华人私域</option>
+      <option value="两者">两者兼有</option>
+    </select>
+    <select id="grass-pri" onchange="filterTable('grass')">
+      <option value="">全部优先级</option>
+      <option value="高">高</option>
+      <option value="中">中</option>
+    </select>
+    <span class="result-count" id="grass-count">8 条</span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="tbl-grass">
+      <thead><tr>
+        <th>渠道 / 运营者</th><th>市场</th><th>用户规模</th><th>运营模式</th>
+        <th>Affiliate结构</th><th>联系方式</th><th>优先级</th><th>操作建议 & 风险</th>
+      </tr></thead>
+      <tbody>
+
+<tr data-q="ALTI Trading 法语公开 高">
+  <td class="name-cell"><div class="main">ALTI Trading (Alexandre Leclair)</div><div class="sub">alti-trading.fr/partenaires · +33 9 71 08 10 15</div></td>
+  <td><span class="badge badge-fr">🇫🇷 法语公开</span></td>
+  <td>145,000 活跃会员<br>105个国家 · Discord私域群</td>
+  <td class="note">付费trading formation + Discord社区 + 私域群 · CPF/OPCO可报销 · 电话销售团队主动致电</td>
+  <td><span class="check-yes">✅ 已有affiliate计划</span><br><span class="contact">需企业身份，收佣金</span></td>
+  <td class="contact">alti-trading.fr/partenaires<br>+33 9 71 08 10 15</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">法国最大trading formation平台，145K成员，已有电话销售团队主动获客。可直接洽谈exchange推广合作</td>
+</tr>
+
+<tr data-q="Stradoji EnBourse 法语公开 高">
+  <td class="name-cell"><div class="main">Stradoji / EnBourse (Sylvain March)</div><div class="sub">stradoji.com / enbourse.fr</div></td>
+  <td><span class="badge badge-fr">🇫🇷 法语公开</span></td>
+  <td>35,000+ YouTube<br>大型私域Discord</td>
+  <td class="note">Trading formation + 私域Salle de Marché (Discord) · 每日live交易 · 私域社群</td>
+  <td><span class="check-yes">✅ 有affiliate联系</span><br><span class="contact">电话销售团队获客</span></td>
+  <td class="contact">stradoji.com / enbourse.fr</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">专注crypto+股票双线，有live带单性质的'Salle de Marché'，每日直播分析市场。学员是主动交易者</td>
+</tr>
+
+<tr data-q="Kasper Trading 销售团队 两者 高">
+  <td class="name-cell"><div class="main">Kasper Trading 销售团队</div><div class="sub">@KasperContact · tradingkasper.com</div></td>
+  <td><span class="badge badge-both">🌐 两者兼有</span></td>
+  <td>15,000+ 成员<br>有主动电话支持团队（Anthony等）</td>
+  <td class="note">学员入群需先通过Kasper电话/Telegram联系，有专门销售人员负责转化和客户服务</td>
+  <td><span class="check-yes">✅ 成熟broker返佣销售闭环</span></td>
+  <td class="contact">@KasperContact<br>tradingkasper.com</td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="note">Kasper Trading自身的销售团队就是典型的'电话销售型带单运营者'。已在类型1表格中深度分析</td>
+</tr>
+
+<tr data-q="Interactive Trading 法语公开 中">
+  <td class="name-cell"><div class="main">Interactive Trading (Xavier Fenaux)</div><div class="sub">interactivtrading.com</div></td>
+  <td><span class="badge badge-fr">🇫🇷 法语公开</span></td>
+  <td>36,000 YouTube<br>私域Discord/Telegram</td>
+  <td class="note">付费formation + Telegram信号群（有限）<br>多个档次：Starter €397 / Scalper €1521</td>
+  <td><span class="check-no">⚠️ 未明确，需直接联系</span></td>
+  <td class="contact">interactivtrading.com<br>YouTube联系</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">偏向交易信号+formation混合模式，Telegram私域群已存在。可作为affiliate合作的第二梯队渠道</td>
+</tr>
+
+<tr data-q="Telegram signal 法语公开 中">
+  <td class="name-cell"><div class="main">Telegram法语小型signal运营者（批量）</div></td>
+  <td><span class="badge badge-fr">🇫🇷 法语公开</span></td>
+  <td>各100-5000人规模<br>总计数十个群</td>
+  <td class="note">免费+付费signal群（月费€20-€100），群主是典型的'带单讲师'，通过broker affiliate或课程变现</td>
+  <td><span class="check-yes">✅ 大多数已有非正式affiliate链接</span></td>
+  <td class="contact">通过CryptoFR.com / 法语Telegram搜索<br>/ 'signaux crypto france' Google搜索</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">法国最接近原始意义上'带单老师'的群体。规模小但数量多，每个群主手里有几百到几千真实活跃交易用户</td>
+</tr>
+
+<tr data-q="Cercle PPM 法语公开 中">
+  <td class="name-cell"><div class="main">Cercle PPM 社群</div><div class="sub">cercleppm.fr</div></td>
+  <td><span class="badge badge-fr">🇫🇷 法语公开</span></td>
+  <td>法国prop firm核心社区</td>
+  <td class="note">付费prop firm coaching + 社区活动 + 私域论坛 · 偏专业的交易讲师性质</td>
+  <td><span class="check-no">⚠️ 未明确</span></td>
+  <td class="contact">cercleppm.fr</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">比Kasper等更专业的交易讲师群体，学员质量更高。可作为补充渠道</td>
+</tr>
+
+<tr data-q="华人微信 华人私域 中">
+  <td class="name-cell"><div class="main">法国华人微信/WhatsApp炒币群</div></td>
+  <td><span class="badge badge-cn">🇨🇳 华人私域</span></td>
+  <td>不可量化<br>（数百个私密群组）</td>
+  <td class="note">私信型带单：群主推荐交易所注册链接，收返佣；无公开宣传；通过口碑传播</td>
+  <td><span class="check-yes">✅ 非正式IB关系（非官方）</span></td>
+  <td class="contact">⚠️ 无公开入口<br>只能通过法国华人社区圈内推荐进入</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">⚠️ 这类社区在公开互联网上完全不可见。触达策略：通过已知华人crypto圈关系人引荐；或找已有法国华人用户的exchange BD团队</td>
+</tr>
+
+<tr data-q="华人YouTube B站 华人私域 中">
+  <td class="name-cell"><div class="main">法国华人YouTube / B站 crypto账号</div></td>
+  <td><span class="badge badge-cn">🇨🇳 华人私域</span></td>
+  <td>中小规模，千至万级订阅</td>
+  <td class="note">视频内容+微信私域引流，有推荐码，部分已和中国exchange（如OKX、Binance中文）合作</td>
+  <td><span class="check-yes">✅ 部分已有exchange affiliate链接</span></td>
+  <td class="contact">YouTube/B站搜索<br>'法国 crypto'/'巴黎 比特币'</td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="note">可通过YouTube/B站公开搜索找到部分创作者。合作切入点：提供面向法国合规的exchange合作</td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ ACTION ═══════════════════════════════ -->
+<div id="panel-action" class="panel">
+  <div class="filter-bar">
+    <input type="text" id="act-q" placeholder="搜索渠道 / 话术…" oninput="filterTable('act')">
+    <select id="act-pri" onchange="filterTable('act')">
+      <option value="">全部优先级</option>
+      <option value="高">高</option>
+      <option value="中">中</option>
+    </select>
+    <select id="act-type" onchange="filterTable('act')">
+      <option value="">全部类型</option>
+      <option value="类型1">类型1 KOL</option>
+      <option value="类型2">类型2 工具</option>
+      <option value="类型3">类型3 大户</option>
+      <option value="类型4">类型4 讲师</option>
+    </select>
+    <span class="result-count" id="act-count">20 条</span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="tbl-act">
+      <thead><tr>
+        <th style="width:44px">#</th><th>渠道名称</th><th>类型</th>
+        <th>优先级</th><th>第一步行动</th><th>核心话术切入点</th>
+        <th>预计响应周期</th><th>状态</th>
+      </tr></thead>
+      <tbody>
+
+<tr data-q="Kasper Trading 类型1 高">
+  <td><div class="action-num">1</div></td>
+  <td class="name-cell"><div class="main">Kasper Trading</div></td>
+  <td><span class="badge" style="background:var(--tag-kol-bg);color:var(--tag-kol)">类型1 KOL</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">Telegram DM → @KasperContact · 简介你的exchange + broker IB条件</td>
+  <td class="note">「你们已有VT Markets/Axi合作，我们可提供更高IB比例或exclusive条件，帮你的15K成员降低交易成本」</td>
+  <td>1–3天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="InvestX 类型1 高">
+  <td><div class="action-num">2</div></td>
+  <td class="name-cell"><div class="main">InvestX (Roro Vevo)</div></td>
+  <td><span class="badge" style="background:var(--tag-kol-bg);color:var(--tag-kol)">类型1 KOL</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">Telegram DM → @Investxsupport · 说明你是exchange合作方</td>
+  <td class="note">「你们的120K社区已有FxLift合作，我们可提供crypto-native交易所，给你的用户更好的费率+返佣」</td>
+  <td>2–5天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="Julien Roman 类型1 高">
+  <td><div class="action-num">3</div></td>
+  <td class="name-cell"><div class="main">Julien Roman</div></td>
+  <td><span class="badge" style="background:var(--tag-kol-bg);color:var(--tag-kol)">类型1 KOL</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">julienroman.com 联系表单 · LinkedIn InMail</td>
+  <td class="note">「Club X 300+成员都是认真的投资者，我们希望为他们提供专业级交易条件，并向你提供affiliate合作」</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="ALTI Trading 类型4 高">
+  <td><div class="action-num">4</div></td>
+  <td class="name-cell"><div class="main">ALTI Trading</div></td>
+  <td><span class="badge" style="background:var(--tag-grass-bg);color:var(--tag-grass)">类型4 讲师</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">alti-trading.fr/partenaires 申请affiliate · 或直接致电 +33 9 71 08 10 15</td>
+  <td class="note">「你们145K成员都有交易需求，我们可以成为你们推荐的交易所，给学员exclusive返佣+我们给你的affiliate commission」</td>
+  <td>1–3天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="Bybit EU 类型2 高">
+  <td><div class="action-num">5</div></td>
+  <td class="name-cell"><div class="main">Bybit EU Affiliate</div></td>
+  <td><span class="badge" style="background:var(--tag-tool-bg);color:var(--tag-tool)">类型2 工具</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">bybit.com/en/partners/affiliate/ 提交申请</td>
+  <td class="note">申请成为Bybit EU官方IB，获取推广资格，然后再接触法国KOL</td>
+  <td>5–10天</td>
+  <td><span class="status-badge">待申请</span></td>
+</tr>
+<tr data-q="Stradoji 类型4 高">
+  <td><div class="action-num">6</div></td>
+  <td class="name-cell"><div class="main">Stradoji / EnBourse</div></td>
+  <td><span class="badge" style="background:var(--tag-grass-bg);color:var(--tag-grass)">类型4 讲师</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">stradoji.com 联系页 · 或通过LinkedIn联系Sylvain March</td>
+  <td class="note">「你们的Salle de Marché每天有活跃的crypto交易者，我们希望成为你们推荐的交易所，提供exclusive费率+affiliate收入」</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="FTMO 类型3 高">
+  <td><div class="action-num">7</div></td>
+  <td class="name-cell"><div class="main">FTMO法国社区</div></td>
+  <td><span class="badge" style="background:var(--badge-multi-bg);color:var(--badge-multi)">类型3 大户</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">加入FTMO Discord → 在法语频道自然互动 → 建立存在感</td>
+  <td class="note">「我们针对prop firm trader提供特殊API条件，低延迟+返佣，帮你最大化net profit」</td>
+  <td>1–2周</td>
+  <td><span class="status-badge">待执行</span></td>
+</tr>
+<tr data-q="Cercle PPM 类型3 高">
+  <td><div class="action-num">8</div></td>
+  <td class="name-cell"><div class="main">Cercle PPM</div></td>
+  <td><span class="badge" style="background:var(--badge-multi-bg);color:var(--badge-multi)">类型3/4</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">cercleppm.fr 联系 / 或通过Kasper Trading社群引荐</td>
+  <td class="note">「法国最专业的prop firm社区，我们希望成为你们学员首选的交易所」</td>
+  <td>1–2周</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="tethermax 类型2 高">
+  <td><div class="action-num">9</div></td>
+  <td class="name-cell"><div class="main">tethermax.io</div></td>
+  <td><span class="badge" style="background:var(--tag-tool-bg);color:var(--tag-tool)">类型2 工具</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">tethermax.io/en 联系 support@tethermax.io</td>
+  <td class="note">「我们希望成为tethermax支持的交易所之一，帮助法国用户通过你们的平台获得返佣」</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="Freqtrade 类型3 高">
+  <td><div class="action-num">10</div></td>
+  <td class="name-cell"><div class="main">Freqtrade Discord</div></td>
+  <td><span class="badge" style="background:var(--badge-multi-bg);color:var(--badge-multi)">类型3 大户</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">加入discord.gg/freqtrade → 发布技术内容（API文档、策略分析）</td>
+  <td class="note">不用广告，用技术内容建立信任，之后在个人主页放联系方式</td>
+  <td>2–4周</td>
+  <td><span class="status-badge">待执行</span></td>
+</tr>
+<tr data-q="CryptoFR 类型3 高">
+  <td><div class="action-num">11</div></td>
+  <td class="name-cell"><div class="main">CryptoFR.com</div></td>
+  <td><span class="badge" style="background:var(--badge-multi-bg);color:var(--badge-multi)">类型3 大户</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">注册账号 → 在论坛贡献内容 → 建立存在感</td>
+  <td class="note">法国本土最大crypto论坛，用技术帖子引流</td>
+  <td>2–4周</td>
+  <td><span class="status-badge">待执行</span></td>
+</tr>
+<tr data-q="Crypto Trading France 类型1 高">
+  <td><div class="action-num">12</div></td>
+  <td class="name-cell"><div class="main">Crypto Trading France</div></td>
+  <td><span class="badge" style="background:var(--tag-kol-bg);color:var(--tag-kol)">类型1 KOL</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">cryptotradingfr.com 联系表单</td>
+  <td class="note">「你们2018年起就在推广Binance/KuCoin，我们可提供更高IB比例」</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="backcom 类型2 高">
+  <td><div class="action-num">13</div></td>
+  <td class="name-cell"><div class="main">backcom.app</div></td>
+  <td><span class="badge" style="background:var(--tag-tool-bg);color:var(--tag-tool)">类型2 工具</span></td>
+  <td><span class="pri pri-hi">高</span></td>
+  <td class="action">backcom.app 官网联系表单</td>
+  <td class="note">申请成为backcom支持的交易所</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+
+<tr data-q="Interactive Trading 类型4 中">
+  <td><div class="action-num">15</div></td>
+  <td class="name-cell"><div class="main">Interactive Trading</div></td>
+  <td><span class="badge" style="background:var(--tag-grass-bg);color:var(--tag-grass)">类型4 讲师</span></td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="action">interactivtrading.com 联系</td>
+  <td class="note">「你们的Telegram信号群已有活跃用户，我们希望成为合作exchange」</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="Telegram signal 类型4 中">
+  <td><div class="action-num">16</div></td>
+  <td class="name-cell"><div class="main">法语Telegram signal小群主（批量）</div></td>
+  <td><span class="badge" style="background:var(--tag-grass-bg);color:var(--tag-grass)">类型4 讲师</span></td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="action">Google搜索'signaux crypto france telegram' → 逐一联系群主</td>
+  <td class="note">「你的群有X00名活跃trader，我们给你的用户提供返佣，给你affiliate佣金」</td>
+  <td>按需推进</td>
+  <td><span class="status-badge">待规划</span></td>
+</tr>
+<tr data-q="codedeparrainage 类型2 中">
+  <td><div class="action-num">17</div></td>
+  <td class="name-cell"><div class="main">codedeparrainage.fr</div></td>
+  <td><span class="badge" style="background:var(--tag-tool-bg);color:var(--tag-tool)">类型2 工具</span></td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="action">通过网站联系</td>
+  <td class="note">申请成为他们推荐的交易所之一，提供exclusive返佣code</td>
+  <td>3–7天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="BeInCrypto France 类型1 中">
+  <td><div class="action-num">18</div></td>
+  <td class="name-cell"><div class="main">BeInCrypto France</div></td>
+  <td><span class="badge" style="background:var(--tag-kol-bg);color:var(--tag-kol)">类型1 KOL</span></td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="action">fr.beincrypto.com 合作/联系页 · 官方邮件</td>
+  <td class="note">「你们的法语Telegram社区覆盖广，我们希望成为媒体合作exchange」</td>
+  <td>5–10天</td>
+  <td><span class="status-badge">待联系</span></td>
+</tr>
+<tr data-q="华人微信 类型4 中">
+  <td><div class="action-num">19</div></td>
+  <td class="name-cell"><div class="main">华人微信炒币群（人脉引荐）</div></td>
+  <td><span class="badge" style="background:var(--tag-grass-bg);color:var(--tag-grass)">类型4 讲师</span></td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="action">只能通过内部人脉进入，无法公开联系</td>
+  <td class="note">找到已有法国华人crypto用户的exchange BD团队，请其引荐</td>
+  <td>视人脉而定</td>
+  <td><span class="status-badge">待规划</span></td>
+</tr>
+<tr data-q="super-parrain 类型2 中">
+  <td><div class="action-num">20</div></td>
+  <td class="name-cell"><div class="main">super-parrain.com</div></td>
+  <td><span class="badge" style="background:var(--tag-tool-bg);color:var(--tag-tool)">类型2 工具</span></td>
+  <td><span class="pri pri-md">中</span></td>
+  <td class="action">在平台发布exchange parrainage邀请</td>
+  <td class="note">在法国最大parrainage平台建立存在感</td>
+  <td>即时可做</td>
+  <td><span class="status-badge">待执行</span></td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function filterTable(id) {
+  const prefix = id === 'act' ? 'act' : id;
+  const q = (document.getElementById(prefix + '-q')?.value || '').toLowerCase();
+
+  // collect all selects for this panel
+  const selects = {};
+  document.querySelectorAll(`#panel-${id === 'act' ? 'action' : id} select`).forEach(s => {
+    selects[s.id] = s.value;
+  });
+
+  const tableId = id === 'act' ? 'tbl-act' :
+                  id === 'kol' ? 'tbl-kol' :
+                  id === 'tool' ? 'tbl-tool' :
+                  id === 'whale' ? 'tbl-whale' : 'tbl-grass';
+
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  let vis = 0;
+  rows.forEach(row => {
+    const dq = (row.dataset.q || '').toLowerCase();
+    const matchQ = !q || dq.includes(q);
+    let matchSel = true;
+    Object.values(selects).forEach(v => {
+      if (v && !dq.includes(v.toLowerCase())) matchSel = false;
+    });
+    const show = matchQ && matchSel;
+    row.classList.toggle('hidden', !show);
+    if (show) vis++;
+  });
+
+  const countEl = document.getElementById(prefix + '-count');
+  if (countEl) countEl.textContent = vis + ' 条';
+}
+</script>
+
+</body>
+</html>
