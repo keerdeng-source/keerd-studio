@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080608">
+<title>INTEL · 市场情报日志</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Gold palette */
+  --gold-100: #fff8e7;
+  --gold-200: #fde9a0;
+  --gold-300: #f9d060;
+  --gold-400: #e8a820;
+  --gold-500: #c98a00;
+  --gold-600: #a06800;
+  --gold-700: #704500;
+
+  /* Diamond/silver */
+  --diam-100: #f0f4ff;
+  --diam-300: #b8cce8;
+  --diam-400: #8aabcf;
+  --diam-500: #5a84aa;
+
+  /* Deep dark */
+  --bg:       #080608;
+  --bg2:      #0e0c10;
+  --surface:  #141018;
+  --surface2: #1c1822;
+  --surface3: #231e2e;
+  --border:   rgba(255,220,100,0.1);
+  --border2:  rgba(255,220,100,0.22);
+  --border3:  rgba(255,220,100,0.4);
+
+  /* Text */
+  --t1: #f5edd8;
+  --t2: #b8a882;
+  --t3: #6b5e44;
+  --t4: #3a3028;
+
+  /* Fonts */
+  --serif: 'Cormorant Garamond', serif;
+  --mono:  'DM Mono', monospace;
+  --sans:  'DM Sans', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN OVERLAY ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 128px;
+}
+
+/* ── AMBIENT GLOW ── */
+.glow-orb {
+  position:fixed; border-radius:50%; pointer-events:none; z-index:0;
+  filter: blur(80px);
+}
+.glow-orb.a { width:400px; height:300px; top:-80px; left:-80px; background:radial-gradient(ellipse, rgba(200,138,0,0.12), transparent 70%); }
+.glow-orb.b { width:300px; height:300px; bottom:100px; right:-60px; background:radial-gradient(ellipse, rgba(90,132,170,0.08), transparent 70%); }
+
+.app { position:relative; z-index:1; max-width:430px; margin:0 auto; padding-bottom:90px; }
+
+/* ══════════════════════════════
+   TOP BAR
+══════════════════════════════ */
+.topbar {
+  position:sticky; top:0; z-index:50;
+  background: rgba(8,6,8,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 0.5px solid var(--border);
+  padding: env(safe-area-inset-top, 0) 20px 0;
+}
+.topbar-inner {
+  display:flex; align-items:center; justify-content:space-between;
+  height:56px;
+}
+.logo-mark {
+  display:flex; align-items:center; gap:10px;
+}
+.logo-gem {
+  width:30px; height:30px; position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.logo-gem svg { width:30px; height:30px; }
+.logo-text {
+  font-family: var(--serif);
+  font-size:18px; font-weight:500;
+  letter-spacing:0.15em;
+  background: linear-gradient(135deg, var(--gold-300) 0%, var(--gold-100) 50%, var(--gold-400) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.topbar-right {
+  font-family: var(--mono);
+  font-size:11px; color: var(--t3);
+  letter-spacing:0.05em;
+}
+.topbar-date { color: var(--gold-400); }
+
+/* ══════════════════════════════
+   DATE SCROLL
+══════════════════════════════ */
+.date-scroll-wrap {
+  overflow-x: auto; scrollbar-width:none;
+  padding: 12px 20px;
+  display:flex; gap:8px;
+}
+.date-scroll-wrap::-webkit-scrollbar { display:none; }
+.date-chip {
+  flex-shrink:0; text-align:center;
+  width:46px; padding:8px 0;
+  border-radius:12px;
+  border: 0.5px solid var(--border);
+  background: var(--surface);
+  cursor:pointer; transition:all 0.2s;
+}
+.date-chip:hover { border-color: var(--border2); }
+.date-chip.active {
+  background: linear-gradient(160deg, #2a2016, #1a1508);
+  border-color: var(--gold-500);
+  box-shadow: 0 0 16px rgba(200,138,0,0.25), inset 0 1px 0 rgba(255,220,100,0.15);
+}
+.dc-day { font-size:9px; color:var(--t3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px; }
+.dc-num { font-family:var(--serif); font-size:18px; font-weight:400; color:var(--t2); }
+.date-chip.active .dc-num { color: var(--gold-300); }
+.date-chip.active .dc-day { color: var(--gold-500); }
+.dc-dot { width:4px; height:4px; border-radius:50%; background:var(--gold-500); margin:3px auto 0; opacity:0; }
+.date-chip.has-data .dc-dot { opacity:1; }
+
+/* ══════════════════════════════
+   HERO CARD
+══════════════════════════════ */
+.hero-card {
+  margin: 0 16px 12px;
+  border-radius: 20px;
+  position: relative; overflow:hidden;
+  background: linear-gradient(145deg, #1a1408 0%, #0e0c10 50%, #0a0814 100%);
+  border: 0.5px solid var(--border2);
+  padding: 24px 22px 20px;
+}
+.hero-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--gold-400), var(--gold-200), var(--gold-400), transparent);
+  opacity:0.6;
+}
+.hero-card::after {
+  content:'';
+  position:absolute; top:-60px; right:-40px;
+  width:200px; height:200px;
+  background: radial-gradient(ellipse, rgba(200,138,0,0.08), transparent 65%);
+  pointer-events:none;
+}
+.hero-greeting {
+  font-family: var(--serif);
+  font-size:11px; font-weight:400; font-style:italic;
+  color: var(--gold-500); letter-spacing:0.12em; text-transform:uppercase;
+  margin-bottom:6px;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size:26px; font-weight:300; line-height:1.25;
+  color: var(--t1); margin-bottom:10px;
+}
+.hero-title em { font-style:italic; color:var(--gold-300); }
+.hero-desc { font-size:12px; color:var(--t2); line-height:1.7; margin-bottom:18px; }
+
+/* PROGRESS */
+.hero-prog { }
+.prog-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.prog-label { font-family:var(--mono); font-size:10px; color:var(--t3); letter-spacing:0.08em; text-transform:uppercase; }
+.prog-num { font-family:var(--serif); font-size:22px; color:var(--gold-300); }
+.prog-track {
+  height:3px; background:var(--surface3); border-radius:2px; overflow:hidden;
+}
+.prog-fill {
+  height:100%; border-radius:2px;
+  background: linear-gradient(90deg, var(--gold-600), var(--gold-300), var(--gold-200));
+  box-shadow: 0 0 8px rgba(200,138,0,0.5);
+  transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* BADGES ROW */
+.badges-row {
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin-top:14px; padding-top:14px;
+  border-top: 0.5px solid var(--border);
+}
+.badge-gem {
+  display:flex; align-items:center; gap:5px;
+  font-size:10px; color:var(--t3);
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius:20px; padding:4px 10px;
+  font-family:var(--mono);
+  transition:all 0.2s;
+}
+.badge-gem.earned {
+  background: linear-gradient(135deg, #1e1808, #2a2010);
+  border-color: var(--gold-600);
+  color: var(--gold-400);
+}
+.badge-gem .gem-icon { font-size:12px; }
+
+/* ══════════════════════════════
+   SECTION CARDS
+══════════════════════════════ */
+.sec-card {
+  margin: 0 16px 10px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.sec-card:hover { border-color: var(--border2); }
+
+.sec-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 16px 18px;
+  cursor:pointer; user-select:none;
+}
+.sec-head-left { display:flex; align-items:center; gap:12px; }
+
+.sec-gem-icon {
+  width:38px; height:38px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; flex-shrink:0;
+}
+.sec-gem-icon svg { width:22px; height:22px; }
+
+.sec-titles { }
+.sec-t1 { font-family:var(--serif); font-size:16px; font-weight:400; color:var(--t1); letter-spacing:0.02em; }
+.sec-t2 { font-size:11px; color:var(--t3); margin-top:1px; font-family:var(--mono); }
+.sec-head-right { display:flex; align-items:center; gap:8px; }
+.sec-tag { font-family:var(--mono); font-size:9px; letter-spacing:0.08em; padding:3px 8px; border-radius:20px; text-transform:uppercase; }
+.tag-gold { background:rgba(200,138,0,0.12); color:var(--gold-500); border:0.5px solid rgba(200,138,0,0.25); }
+.tag-diamond { background:rgba(90,132,170,0.1); color:var(--diam-400); border:0.5px solid rgba(90,132,170,0.2); }
+.tag-ruby { background:rgba(180,40,60,0.1); color:#e05070; border:0.5px solid rgba(180,40,60,0.2); }
+.sec-chevron { color:var(--t4); font-size:10px; transition:transform 0.25s; }
+.sec-card.open .sec-chevron { transform:rotate(90deg); }
+
+.sec-body { padding:0 18px 18px; display:none; animation:fadeIn 0.2s ease; }
+.sec-card.open .sec-body { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+
+/* GUIDE BOX */
+.guide {
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size:12px; line-height:1.75;
+  border: 0.5px solid;
+}
+.guide.gold { background:rgba(200,138,0,0.06); border-color:rgba(200,138,0,0.18); color:var(--gold-400); }
+.guide.diamond { background:rgba(90,132,170,0.06); border-color:rgba(90,132,170,0.18); color:var(--diam-400); }
+.guide.emerald { background:rgba(20,120,80,0.08); border-color:rgba(20,160,100,0.2); color:#50c896; }
+.guide-title { font-weight:600; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:5px; display:flex; align-items:center; gap:5px; }
+
+/* TASK LIST */
+.tasks { display:flex; flex-direction:column; gap:6px; }
+.task {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px;
+  background:var(--surface2);
+  border:0.5px solid var(--border);
+  border-radius:12px; cursor:pointer;
+  transition:all 0.2s;
+}
+.task:hover { border-color:var(--border2); background:var(--surface3); }
+.task.done { opacity:0.38; }
+.task.done .task-txt { text-decoration:line-through; }
+
+.check-gem {
+  width:22px; height:22px; flex-shrink:0; margin-top:1px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:6px;
+  border: 1.5px solid var(--border2);
+  font-size:11px; transition:all 0.2s;
+  background: var(--surface3);
+}
+.task.done .check-gem {
+  background: linear-gradient(135deg, var(--gold-600), var(--gold-400));
+  border-color: var(--gold-400);
+  box-shadow: 0 0 8px rgba(200,138,0,0.4);
+  color: var(--bg);
+}
+
+.task-info { flex:1; }
+.task-txt { font-size:13px; color:var(--t1); line-height:1.5; }
+.task-sub { font-size:11px; color:var(--t3); margin-top:3px; line-height:1.5; }
+.task-url { font-family:var(--mono); font-size:10px; color:var(--gold-600); text-decoration:none; margin-top:4px; display:inline-flex; align-items:center; gap:3px; }
+.task-url:hover { color:var(--gold-400); }
+
+/* NOTE */
+.note-lbl { font-family:var(--mono); font-size:9px; color:var(--t4); text-transform:uppercase; letter-spacing:0.1em; margin:16px 0 6px; }
+.note-field {
+  width:100%;
+  background:var(--surface2);
+  border:0.5px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  font-family:var(--sans); font-size:13px; color:var(--t1); line-height:1.75;
+  resize:none; outline:none; min-height:80px;
+  transition:border-color 0.2s;
+  caret-color: var(--gold-400);
+}
+.note-field:focus { border-color:var(--gold-600); box-shadow:0 0 12px rgba(200,138,0,0.08); }
+.note-field::placeholder { color:var(--t4); font-style:italic; }
+
+/* MARKET NOTE — terminal style */
+.terminal {
+  background: #06050a;
+  border: 0.5px solid rgba(200,138,0,0.15);
+  border-radius:12px; padding:14px 16px;
+  font-family:var(--mono); margin-bottom:10px;
+}
+.terminal-bar {
+  display:flex; gap:5px; margin-bottom:12px;
+}
+.terminal-dot { width:8px; height:8px; border-radius:50%; }
+.terminal-input-row { display:flex; gap:8px; align-items:flex-start; margin-bottom:6px; }
+.terminal-num { font-size:11px; color:var(--gold-600); flex-shrink:0; margin-top:2px; }
+.terminal-in {
+  flex:1; background:transparent; border:none; outline:none;
+  font-family:var(--mono); font-size:12px; color:var(--gold-200);
+  line-height:1.7; resize:none; caret-color:var(--gold-400);
+}
+.terminal-in::placeholder { color:rgba(200,138,0,0.2); }
+
+/* CONCEPT */
+.concept-jewel {
+  border-radius:14px; padding:18px 16px; margin-bottom:12px;
+  background: linear-gradient(145deg, #1a1020, #10080e);
+  border: 0.5px solid rgba(167,139,250,0.2);
+  position:relative; overflow:hidden;
+}
+.concept-jewel::before {
+  content:'◆';
+  position:absolute; top:-10px; right:10px;
+  font-size:80px; color:rgba(167,139,250,0.03);
+  pointer-events:none; line-height:1;
+}
+.concept-label { font-family:var(--mono); font-size:9px; color:rgba(167,139,250,0.5); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:8px; }
+.concept-term { font-family:var(--serif); font-size:22px; font-weight:400; font-style:italic; color:#c4b5fd; margin-bottom:10px; line-height:1.2; }
+.concept-def { font-size:12.5px; color:rgba(196,181,253,0.7); line-height:1.8; white-space:pre-line; }
+.concept-q { margin-top:12px; font-size:11px; color:var(--gold-500); background:rgba(200,138,0,0.07); border:0.5px solid rgba(200,138,0,0.15); border-radius:8px; padding:9px 12px; line-height:1.6; }
+
+/* EXCHANGE TABLE */
+.ex-field { background:var(--surface2); border:0.5px solid var(--border); border-radius:10px; padding:11px 13px; margin-bottom:8px; }
+.ex-field-label { font-family:var(--mono); font-size:9px; color:var(--t4); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:5px; }
+.ex-field textarea { width:100%; background:transparent; border:none; outline:none; font-family:var(--sans); font-size:13px; color:var(--t1); resize:none; line-height:1.6; caret-color:var(--gold-400); }
+.ex-field textarea::placeholder { color:var(--t4); font-style:italic; }
+
+/* ══════════════════════════════
+   AI CHAT
+══════════════════════════════ */
+.chat-wrap { margin:0 16px; }
+.chat-head {
+  display:flex; align-items:center; gap:12px;
+  padding:16px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius:18px 18px 0 0;
+  border-bottom:0.5px solid var(--border);
+}
+.ai-gem {
+  width:38px; height:38px; border-radius:12px; flex-shrink:0;
+  background: linear-gradient(135deg, #1a0a2e, #2a1040);
+  border: 0.5px solid rgba(167,139,250,0.3);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+  box-shadow: 0 0 16px rgba(124,58,237,0.2);
+}
+.ai-name-wrap .ai-nm { font-family:var(--serif); font-size:15px; font-weight:400; color:var(--t1); }
+.ai-name-wrap .ai-st { font-size:10px; color:#7c3aed; font-family:var(--mono); letter-spacing:0.05em; display:flex; align-items:center; gap:4px; }
+.ai-pulse { width:5px; height:5px; border-radius:50%; background:#7c3aed; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.quick-pills { padding:10px 0 6px; display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+.quick-pills::-webkit-scrollbar { display:none; }
+.pill-btn {
+  flex-shrink:0; font-family:var(--mono); font-size:10px;
+  padding:6px 12px; border-radius:20px;
+  background:var(--surface2); border:0.5px solid var(--border);
+  color:var(--t2); cursor:pointer; white-space:nowrap;
+  transition:all 0.2s; letter-spacing:0.04em;
+}
+.pill-btn:hover { border-color:var(--gold-600); color:var(--gold-400); background:rgba(200,138,0,0.06); }
+
+.chat-msgs {
+  background:var(--surface);
+  border-left:0.5px solid var(--border);
+  border-right:0.5px solid var(--border);
+  padding:14px 16px; max-height:340px; overflow-y:auto;
+  display:flex; flex-direction:column; gap:12px;
+}
+.chat-msgs::-webkit-scrollbar { width:3px; }
+.chat-msgs::-webkit-scrollbar-track { background:transparent; }
+.chat-msgs::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+.cmsg { display:flex; gap:9px; align-items:flex-end; }
+.cmsg.user { flex-direction:row-reverse; }
+.cmsg-av {
+  width:28px; height:28px; border-radius:9px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:14px;
+}
+.cmsg.ai .cmsg-av { background:linear-gradient(135deg,#1a0a2e,#2a1040); border:0.5px solid rgba(167,139,250,0.25); }
+.cmsg.user .cmsg-av { background:linear-gradient(135deg,#1a1008,#2a2010); border:0.5px solid rgba(200,138,0,0.25); }
+.cmsg-bubble {
+  max-width:82%; padding:10px 13px; border-radius:14px;
+  font-size:13px; line-height:1.65;
+}
+.cmsg.ai .cmsg-bubble {
+  background:var(--surface2); border:0.5px solid var(--border); color:var(--t1);
+  border-bottom-left-radius:4px;
+}
+.cmsg.user .cmsg-bubble {
+  background:linear-gradient(135deg,#1e1808,#2a2010);
+  border:0.5px solid var(--gold-700); color:var(--gold-200);
+  border-bottom-right-radius:4px;
+}
+.typing-dots { display:flex; gap:4px; align-items:center; padding:3px 0; }
+.typing-dots span { width:5px; height:5px; border-radius:50%; background:var(--gold-600); animation:blink 1.2s infinite; }
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink { 0%,60%,100%{opacity:0.3} 30%{opacity:1} }
+
+.chat-input-area {
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-top:none;
+  border-radius:0 0 18px 18px;
+  padding:12px 14px;
+  display:flex; gap:10px; align-items:flex-end;
+}
+.chat-in {
+  flex:1; background:var(--surface2);
+  border:0.5px solid var(--border);
+  border-radius:20px; padding:9px 14px;
+  font-family:var(--sans); font-size:13px; color:var(--t1);
+  outline:none; resize:none; line-height:1.5; max-height:90px;
+  transition:border-color 0.2s; caret-color:var(--gold-400);
+}
+.chat-in:focus { border-color:var(--gold-700); }
+.chat-in::placeholder { color:var(--t4); font-style:italic; }
+.send-gem {
+  width:40px; height:40px; flex-shrink:0; border-radius:50%;
+  background: linear-gradient(135deg, var(--gold-600), var(--gold-400));
+  border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px;
+  box-shadow: 0 0 16px rgba(200,138,0,0.3);
+  transition:all 0.2s;
+}
+.send-gem:hover { transform:scale(1.08); box-shadow:0 0 22px rgba(200,138,0,0.5); }
+.send-gem:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* ══════════════════════════════
+   RECORDS / ARCHIVE
+══════════════════════════════ */
+.archive-card {
+  margin:0 16px 10px;
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:14px;
+  padding:14px 16px;
+}
+.archive-header { font-family:var(--serif); font-size:15px; color:var(--t1); margin-bottom:12px; display:flex; align-items:center; gap:8px; justify-content:space-between; }
+.archive-count { font-family:var(--mono); font-size:10px; color:var(--t3); }
+
+.concept-arc-item {
+  background:var(--surface2); border:0.5px solid var(--border);
+  border-radius:10px; padding:12px 14px; margin-bottom:8px;
+}
+.cai-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.cai-term { font-family:var(--serif); font-size:14px; font-style:italic; color:#c4b5fd; }
+.cai-date { font-family:var(--mono); font-size:9px; color:var(--t4); }
+.cai-def { font-size:12px; color:var(--t3); line-height:1.6; }
+.cai-q { font-size:11px; color:var(--gold-600); margin-top:6px; padding:6px 9px; background:rgba(200,138,0,0.05); border-radius:6px; }
+
+/* KOL CARD */
+.kol-item {
+  background:var(--surface2); border:0.5px solid var(--border);
+  border-radius:10px; padding:12px 14px; margin-bottom:8px;
+}
+.kol-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.kol-handle { font-family:var(--mono); font-size:13px; color:var(--gold-400); }
+.kol-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.kol-cell label { font-size:9px; color:var(--t4); text-transform:uppercase; letter-spacing:0.07em; display:block; margin-bottom:2px; font-family:var(--mono); }
+.kol-cell input { width:100%; background:transparent; border:none; border-bottom:0.5px solid var(--border); padding:2px 0; font-family:var(--sans); font-size:12px; color:var(--t1); outline:none; caret-color:var(--gold-400); }
+.kol-cell input::placeholder { color:var(--t4); }
+.kol-note { width:100%; background:transparent; border:none; border-top:0.5px solid var(--border); padding:8px 0 0; margin-top:8px; font-family:var(--sans); font-size:12px; color:var(--t1); outline:none; resize:none; line-height:1.6; caret-color:var(--gold-400); }
+.kol-note::placeholder { color:var(--t4); font-style:italic; }
+
+/* ADD / PRIMARY BTNS */
+.add-btn {
+  width:100%; padding:10px;
+  background:transparent; border:0.5px dashed var(--border2);
+  border-radius:10px; font-family:var(--sans); font-size:12px;
+  color:var(--t3); cursor:pointer; transition:all 0.2s; margin-top:4px;
+}
+.add-btn:hover { border-color:var(--gold-600); color:var(--gold-500); background:rgba(200,138,0,0.04); }
+
+.gold-btn {
+  padding:11px 22px;
+  background: linear-gradient(135deg, var(--gold-700), var(--gold-500));
+  border:none; border-radius:10px;
+  font-family:var(--sans); font-size:13px; font-weight:500;
+  color:var(--bg); cursor:pointer; transition:all 0.2s;
+  box-shadow: 0 2px 12px rgba(200,138,0,0.25);
+}
+.gold-btn:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(200,138,0,0.4); }
+
+/* ══════════════════════════════
+   REPORT
+══════════════════════════════ */
+.report-field { margin-bottom:10px; }
+.report-field label { font-family:var(--mono); font-size:9px; color:var(--t3); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:5px; }
+
+/* ══════════════════════════════
+   BOTTOM NAV
+══════════════════════════════ */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  background:rgba(8,6,8,0.92);
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  border-top:0.5px solid var(--border);
+  padding:0 0 env(safe-area-inset-bottom, 0);
+  display:flex;
+}
+.nav-btn {
+  flex:1; padding:10px 4px 12px; border:none; background:transparent;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; color:var(--t4); font-family:var(--sans); transition:all 0.2s;
+}
+.nav-btn.active { color:var(--gold-400); }
+.nav-btn.active .nav-ic { filter:drop-shadow(0 0 5px rgba(200,138,0,0.5)); }
+.nav-ic { font-size:20px; line-height:1; }
+.nav-lb { font-family:var(--mono); font-size:9px; letter-spacing:0.05em; text-transform:uppercase; }
+
+/* ══════════════════════════════
+   PAGES
+══════════════════════════════ */
+.page { display:none; }
+.page.active { display:block; }
+
+/* SAVE TOAST */
+.toast {
+  position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-10px);
+  background:linear-gradient(135deg,#1e1808,#2a2010);
+  border:0.5px solid var(--gold-700);
+  border-radius:20px; padding:6px 16px;
+  font-family:var(--mono); font-size:11px; color:var(--gold-400);
+  z-index:200; opacity:0; pointer-events:none;
+  box-shadow:0 4px 20px rgba(200,138,0,0.2);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* SCROLL HINT */
+.scroll-section { margin:0 16px 10px; }
+.section-title-standalone {
+  font-family:var(--serif); font-size:12px; font-style:italic;
+  color:var(--t3); letter-spacing:0.1em;
+  padding: 6px 2px 8px; display:flex; align-items:center; gap:8px;
+}
+.section-title-standalone::after { content:''; flex:1; height:0.5px; background:linear-gradient(90deg,var(--border),transparent); }
+
+</style>
+</head>
+<body>
+<div class="glow-orb a"></div>
+<div class="glow-orb b"></div>
+<div id="toast" class="toast">✦ 已保存</div>
+
+<!-- ══ TOP BAR ══ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo-mark">
+      <div class="logo-gem">
+        <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="15,2 26,9 26,21 15,28 4,21 4,9" fill="none" stroke="url(#gs)" stroke-width="1"/>
+          <polygon points="15,7 22,11 22,19 15,23 8,19 8,11" fill="rgba(200,138,0,0.08)"/>
+          <polygon points="15,2 22,11 15,7" fill="rgba(200,138,0,0.2)"/>
+          <polygon points="22,11 26,21 22,19" fill="rgba(200,138,0,0.12)"/>
+          <defs><linearGradient id="gs" x1="0" y1="0" x2="30" y2="30"><stop offset="0%" stop-color="#f9d060"/><stop offset="50%" stop-color="#c98a00"/><stop offset="100%" stop-color="#f9d060"/></linearGradient></defs>
+        </svg>
+      </div>
+      <span class="logo-text">INTEL</span>
+    </div>
+    <div class="topbar-right">
+      <span id="tb-date" class="topbar-date">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: TODAY ══ -->
+<div class="page active" id="page-today">
+
+  <!-- Date scroll -->
+  <div class="date-scroll-wrap" id="date-scroll"></div>
+
+  <!-- Hero -->
+  <div class="hero-card">
+    <div class="hero-greeting" id="hero-greeting">Good Morning</div>
+    <div class="hero-title" id="hero-title">今日任务，<em>开始了</em></div>
+    <div class="hero-desc" id="hero-desc">市场每天都在发生变化。你的工作是观察、记录、思考。<br>不需要完美，只需要每天比昨天多懂一点。</div>
+    <div class="hero-prog">
+      <div class="prog-row">
+        <span class="prog-label">Today's Progress</span>
+        <span class="prog-num" id="prog-num">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="badges-row" id="badges-row">
+      <div class="badge-gem earned"><span class="gem-icon">💎</span>Day 1</div>
+      <div class="badge-gem" id="badge-streak"><span class="gem-icon">🔥</span><span id="streak-text">连续0天</span></div>
+      <div class="badge-gem" id="badge-concepts"><span class="gem-icon">✦</span><span id="concept-badge-text">0 概念</span></div>
+    </div>
+  </div>
+
+  <!-- S1: MORNING SCAN -->
+  <div class="sec-card open" id="s-morning">
+    <div class="sec-head" onclick="toggleSec('s-morning')">
+      <div class="sec-head-left">
+        <div class="sec-gem-icon" style="background:linear-gradient(135deg,#1a1a08,#1e1c08)">
+          <svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="4" stroke="#c98a00" stroke-width="1.2"/><line x1="11" y1="2" x2="11" y2="5" stroke="#c98a00" stroke-width="1.2" stroke-linecap="round"/><line x1="11" y1="17" x2="11" y2="20" stroke="#c98a00" stroke-width="1.2" stroke-linecap="round"/><line x1="2" y1="11" x2="5" y2="11" stroke="#c98a00" stroke-width="1.2" stroke-linecap="round"/><line x1="17" y1="11" x2="20" y2="11" stroke="#c98a00" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="sec-titles">
+          <div class="sec-t1">早上扫描</div>
+          <div class="sec-t2">20 min · 市场资金在哪里？</div>
+        </div>
+      </div>
+      <div class="sec-head-right">
+        <span class="sec-tag tag-gold">必做</span>
+        <span class="sec-chevron">▶</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="guide gold">
+        <div class="guide-title">✦ 新手指引</div>
+        今天不要求你看懂所有数据。只问自己一件事：<strong>今天的钱在流向哪里？</strong><br>CMC 看排名变化，Coinglass 看情绪，3句话总结。
+      </div>
+      <div class="tasks" id="tasks-morning">
+        <div class="task" onclick="toggleTask(this,'m',0)">
+          <div class="check-gem"></div>
+          <div class="task-info">
+            <div class="task-txt">CoinMarketCap — 交易所排名 + Spot vs Derivatives</div>
+            <div class="task-sub">LBank 在哪位？Top 10 成交量有变化吗？Stablecoin 占比？</div>
+            <a class="task-url" href="https://coinmarketcap.com/rankings/exchanges/" target="_blank">↗ coinmarketcap.com/rankings/exchanges</a>
+          </div>
+        </div>
+        <div class="task" onclick="toggleTask(this,'m',1)">
+          <div class="check-gem"></div>
+          <div class="task-info">
+            <div class="task-txt">Coinglass — Funding Rate + Open Interest</div>
+            <div class="task-sub">正 Funding = 大家做多；OI 上升 + 价格上升 = 新多头入场</div>
+            <a class="task-url" href="https://www.coinglass.com/" target="_blank">↗ coinglass.com</a>
+          </div>
+        </div>
+        <div class="task" onclick="toggleTask(this,'m',2)">
+          <div class="check-gem"></div>
+          <div class="task-info">
+            <div class="task-txt">Twitter — 各大交易所今天推了什么</div>
+            <div class="task-sub">看 Binance / Bybit / LBank 官方账号的公告和活动</div>
+          </div>
+        </div>
+        <div class="task" onclick="toggleTask(this,'m',3)">
+          <div class="check-gem"></div>
+          <div class="task-info">
+            <div class="task-txt">（加分）DXY 美元指数方向</div>
+            <div class="task-sub">DXY 下跌 → 对 BTC 有利，这就是宏观连接思维的开始</div>
+            <a class="task-url" href="https://www.tradingview.com/chart/?symbol=TVC%3ADXY" target="_blank">↗ TradingView DXY</a>
+          </div>
+        </div>
+      </div>
+      <div class="note-lbl">市场笔记</div>
+      <textarea class="note-field" id="n-morning" placeholder="今天市场在发生什么？3句话就够了..." rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- S2: EXCHANGE -->
+  <div class="sec-card" id="s-exchange">
+    <div class="sec-head" onclick="toggleSec('s-exchange')">
+      <div class="sec-head-left">
+        <div class="sec-gem-icon" style="background:linear-gradient(135deg,#081a14,#081812)">
+          <svg viewBox="0 0 22 22" fill="none"><rect x="3" y="6" width="16" height="12" rx="2" stroke="#14b87a" stroke-width="1.1"/><path d="M7 6V5a2 2 0 014 0v1" stroke="#14b87a" stroke-width="1.1"/><path d="M8 11h6M8 14h4" stroke="#14b87a" stroke-width="1" stroke-linecap="round"/></svg>
+        </div>
+        <div class="sec-titles">
+          <div class="sec-t1">竞品分析</div>
+          <div class="sec-t2">今日：<span id="ex-name-display" style="color:#14b87a">—</span></div>
+        </div>
+      </div>
+      <div class="sec-head-right">
+        <span class="sec-tag tag-diamond">核心</span>
+        <span class="sec-chevron">▶</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="guide emerald" id="ex-guide-box">
+        <div class="guide-title">🎯 今日焦点</div>
+        <span id="ex-guide-text">每天只研究一家，但研究透彻。</span>
+      </div>
+      <div class="ex-field"><div class="ex-field-label">主推产品</div><textarea id="ex-1" rows="2" placeholder="首页在推什么？Futures? Copy trading? 新活动?"></textarea></div>
+      <div class="ex-field"><div class="ex-field-label">新 Token / 活动</div><textarea id="ex-2" rows="2" placeholder="上了什么新币？有 Launchpool 吗？APY 多少？"></textarea></div>
+      <div class="ex-field"><div class="ex-field-label">Affiliate 机制</div><textarea id="ex-3" rows="2" placeholder="返佣比例？等级结构？有没有专属 Dashboard？"></textarea></div>
+      <div class="ex-field"><div class="ex-field-label">用户体验印象</div><textarea id="ex-4" rows="2" placeholder="App 体验如何？新手引导？注册流程？"></textarea></div>
+      <div class="note-lbl">LBank 和它差在哪里？</div>
+      <textarea class="note-field" id="n-exchange" placeholder="这是最重要的问题。不是"哪个更好"，而是：它在某一点上做了什么，我们可以学什么？" rows="4"></textarea>
+    </div>
+  </div>
+
+  <!-- S3: MARKET NOTE -->
+  <div class="sec-card" id="s-note">
+    <div class="sec-head" onclick="toggleSec('s-note')">
+      <div class="sec-head-left">
+        <div class="sec-gem-icon" style="background:linear-gradient(135deg,#1a1208,#16100a)">
+          <svg viewBox="0 0 22 22" fill="none"><path d="M6 17l2-4 8-8a1.5 1.5 0 012 2l-8 8-4 2z" stroke="#e8a820" stroke-width="1.1" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="sec-titles">
+          <div class="sec-t1">今日观点输出</div>
+          <div class="sec-t2">写下来才是真的理解</div>
+        </div>
+      </div>
+      <div class="sec-head-right">
+        <span class="sec-chevron">▶</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="guide gold">
+        <div class="guide-title">✍️ 为什么要写</div>
+        不需要准确预测，不需要完美。写下来是为了训练你的分析语言。半年后回看，你会看到自己的成长。
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dot" style="background:#ff5f57"></div>
+          <div class="terminal-dot" style="background:#ffbd2e"></div>
+          <div class="terminal-dot" style="background:#28ca41"></div>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--t4);margin-left:6px;letter-spacing:0.1em">MARKET · NOTE</span>
+        </div>
+        <div class="terminal-input-row"><span class="terminal-num">01.</span><textarea class="terminal-in" id="mn1" rows="1" placeholder="市场结构观察..."></textarea></div>
+        <div class="terminal-input-row"><span class="terminal-num">02.</span><textarea class="terminal-in" id="mn2" rows="1" placeholder="衍生品 / 资金情绪信号..."></textarea></div>
+        <div class="terminal-input-row"><span class="terminal-num">03.</span><textarea class="terminal-in" id="mn3" rows="1" placeholder="今天需要关注的事情..."></textarea></div>
+      </div>
+      <div style="font-size:10px;color:var(--t4);font-family:var(--mono)">✦ 写完截图存到 LinkedIn 草稿，这是你 market voice 的开始</div>
+    </div>
+  </div>
+
+  <!-- S4: CONCEPT -->
+  <div class="sec-card" id="s-concept">
+    <div class="sec-head" onclick="toggleSec('s-concept')">
+      <div class="sec-head-left">
+        <div class="sec-gem-icon" style="background:linear-gradient(135deg,#120820,#180c28)">
+          <svg viewBox="0 0 22 22" fill="none"><polygon points="11,2 13.5,8 20,8 14.5,12.5 16.5,19 11,15 5.5,19 7.5,12.5 2,8 8.5,8" stroke="#a78bfa" stroke-width="1" stroke-linejoin="round" fill="none"/></svg>
+        </div>
+        <div class="sec-titles">
+          <div class="sec-t1">今日一个概念</div>
+          <div class="sec-t2" id="concept-sec-sub">每天积累一块砖</div>
+        </div>
+      </div>
+      <div class="sec-head-right">
+        <span class="sec-tag tag-ruby">必做</span>
+        <span class="sec-chevron">▶</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="concept-jewel">
+        <div class="concept-label">✦ Today's Concept</div>
+        <div class="concept-term" id="c-term">—</div>
+        <div class="concept-def" id="c-def">加载中...</div>
+        <div class="concept-q" id="c-q"></div>
+      </div>
+      <div class="note-lbl">用自己的话解释（写给不懂金融的朋友）</div>
+      <textarea class="note-field" id="n-concept" placeholder="不用专业词汇。比如：Funding Rate 就像是借钱的利息，只不过有时候是做多的人付钱给做空的人..." rows="3"></textarea>
+      <div class="note-lbl">和我工作的关系</div>
+      <textarea class="note-field" id="n-concept-work" placeholder="这个概念怎么帮助我更好理解 LBank 的产品？" rows="2"></textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ PAGE: RECORDS ══ -->
+<div class="page" id="page-records">
+  <div style="padding:16px">
+
+    <div class="section-title-standalone">概念积累库</div>
+    <div class="archive-card" style="padding:0;border:none;background:transparent">
+      <div id="concept-archive-list"></div>
+      <div class="archive-card" style="padding:14px 16px">
+        <div style="font-family:var(--serif);font-size:14px;color:var(--t2);margin-bottom:12px">+ 添加新概念</div>
+        <input id="new-term" style="width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--t1);outline:none;margin-bottom:8px;caret-color:var(--gold-400)" placeholder="概念名称...">
+        <textarea id="new-def" class="note-field" placeholder="用自己的话定义..." rows="2" style="margin-bottom:8px"></textarea>
+        <textarea id="new-rel" class="note-field" placeholder="和工作的关系..." rows="2" style="margin-bottom:10px"></textarea>
+        <button class="gold-btn" onclick="addConcept()">✦ 保存到概念库</button>
+      </div>
+    </div>
+
+    <div class="section-title-standalone" style="margin-top:8px">KOL 追踪表</div>
+    <div id="kol-list-wrap"></div>
+    <div style="margin:0 0 10px">
+      <button class="add-btn" onclick="addKol()">+ 添加 KOL 记录</button>
+    </div>
+
+    <div class="section-title-standalone" style="margin-top:8px">今日笔记摘要</div>
+    <div id="notes-summary"></div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE: REPORT ══ -->
+<div class="page" id="page-report">
+  <div style="padding:16px">
+    <div class="section-title-standalone">Weekly Brief</div>
+    <div class="guide diamond" style="margin-bottom:12px">
+      <div class="guide-title">📋 每周五完成</div>
+      写出这份 Brief 是从"看资讯"升级到"做分析"的关键一步。可以发给上司，也可以发 LinkedIn。
+    </div>
+    <div class="archive-card">
+      <div class="report-field"><label>1. 市场结构</label><textarea class="note-field" id="r1" placeholder="本周 BTC / 大市结构观察..." rows="3"></textarea></div>
+      <div class="report-field"><label>2. 板块轮动</label><textarea class="note-field" id="r2" placeholder="哪个 narrative 在起，哪个在退..." rows="3"></textarea></div>
+      <div class="report-field"><label>3. 竞品大动作</label><textarea class="note-field" id="r3" placeholder="Binance / Bybit 本周做了什么..." rows="3"></textarea></div>
+      <div class="report-field"><label>4. Affiliate 信号</label><textarea class="note-field" id="r4" placeholder="哪些 KOL 在推什么，哪个地区活跃..." rows="3"></textarea></div>
+      <div class="report-field"><label>5. LBank 机会点</label><textarea class="note-field" id="r5" placeholder="基于本周观察，LBank 可以做什么？" rows="3"></textarea></div>
+      <div class="report-field"><label>6. 宏观加分项</label><textarea class="note-field" id="r6" placeholder="Fed / DXY / 传统机构动向..." rows="2"></textarea></div>
+      <button class="gold-btn" onclick="exportReport()" style="margin-top:4px">↓ 导出 Brief</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: AI ══ -->
+<div class="page" id="page-ai">
+  <div style="padding:12px 16px 0">
+    <div class="chat-wrap" style="margin:0">
+      <div class="chat-head">
+        <div class="ai-gem">✦</div>
+        <div class="ai-name-wrap">
+          <div class="ai-nm">Intel AI · 学习助手</div>
+          <div class="ai-st"><div class="ai-pulse"></div>随时为你解答</div>
+        </div>
+      </div>
+      <div class="quick-pills" id="quick-pills">
+        <button class="pill-btn" onclick="qAsk('什么是 Funding Rate？用简单的话解释')">Funding Rate 是什么？</button>
+        <button class="pill-btn" onclick="qAsk('今天我应该重点关注哪些市场数据？')">今天看什么？</button>
+        <button class="pill-btn" onclick="qAsk('永续合约和普通期货有什么区别？')">永续 vs 期货</button>
+        <button class="pill-btn" onclick="qAsk('Hyperliquid 为什么最近很火？')">Hyperliquid？</button>
+        <button class="pill-btn" onclick="qAsk('怎么判断一个 KOL 真的能带来交易量？')">KOL 筛选</button>
+        <button class="pill-btn" onclick="qAsk('加息对 crypto 市场有什么影响？')">加息影响</button>
+        <button class="pill-btn" onclick="qAsk('Open Interest 上升说明什么？')">OI 上升？</button>
+        <button class="pill-btn" onclick="qAsk('如何写一份像机构分析师一样的 market note？')">写 market note</button>
+      </div>
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="cmsg ai">
+          <div class="cmsg-av">✦</div>
+          <div class="cmsg-bubble">你好！我是你的学习助手 ✨<br><br>
+我知道零基础进入 crypto 金融行业真的不容易。无论是"Funding Rate 是什么意思"，还是"今天我该关注什么"，都可以直接问我。<br><br>
+我会用最简单的语言帮你解释，并且永远连接到你的实际工作中。</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-in" id="chat-in" placeholder="问任何问题..."
+          rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+        <button class="send-gem" id="send-gem" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="switchPage('today',this)">
+    <div class="nav-ic">◆</div>
+    <div class="nav-lb">今日</div>
+  </button>
+  <button class="nav-btn" onclick="switchPage('records',this)">
+    <div class="nav-ic">✦</div>
+    <div class="nav-lb">记录</div>
+  </button>
+  <button class="nav-btn" onclick="switchPage('report',this)">
+    <div class="nav-ic">◈</div>
+    <div class="nav-lb">周报</div>
+  </button>
+  <button class="nav-btn" onclick="switchPage('ai',this)">
+    <div class="nav-ic">⬡</div>
+    <div class="nav-lb">助手</div>
+  </button>
+</div>
+
+<script>
+// ══════════════════ DATA ══════════════════
+const CONCEPTS = [
+  {term:'Perpetual Futures', subtitle:'永续合约', def:'没有到期日的期货合约。交易所用 Funding Rate 机制让合约价格锚定现货。\n\n为什么让交易所更赚钱：\n→ 杠杆交易手续费是现货的3-5倍\n→ 爆仓产生保险基金收入\n→ 用户活跃度极高', q:'为什么交易所比起 spot，更爱推 futures？'},
+  {term:'Funding Rate', subtitle:'资金费率', def:'每8小时结算一次的费率。\n\n正值 = 做多的人付给做空的人（市场过热）\n负值 = 做空的人付给做多的人（市场悲观）\n\n持续正高 Funding = 局部顶部的信号。', q:'Funding Rate 持续为正时，对 LBank 用户意味着什么风险？'},
+  {term:'Open Interest', subtitle:'未平仓合约量', def:'所有还没关闭的合约总量。\n\nOI↑ + 价格↑ = 新多头入场（健康上涨）\nOI↑ + 价格↓ = 新空头入场（看跌信号）\nOI↓ = 大家在平仓减少风险', q:'在 Coinglass 上，你会怎么用 OI 变化来判断市场方向？'},
+  {term:'Liquidation', subtitle:'爆仓 / 强制平仓', def:'仓位亏损超过保证金时，交易所强制关闭仓位。\n\n级联爆仓：一波爆仓→价格下跌→触发更多爆仓→价格加速下跌\n\nCoinglass 的 Liquidation Map 就是在追踪这件事。', q:'交易所的"保险基金"(Insurance Fund)是用来做什么的？'},
+  {term:'Market Maker', subtitle:'做市商', def:'在买卖两边同时挂单，提供市场流动性的机构。\n\n他们赚取买卖价差（Spread）。交易所需要他们来保持订单簿活跃。\n\n没有做市商 = 买卖价差很大 = 用户体验很差。', q:'LBank 和做市商的关系如何影响到普通用户的交易体验？'},
+  {term:'Affiliate Program', subtitle:'推广联盟', def:'通过独特链接推广交易所，赚取被推荐用户交易手续费比例。\n\n核心指标：真实交易量（不只是注册数量）\n\n流量 ≠ 交易量 ← 这是 affiliate 世界最重要的认知。', q:'什么类型的 KOL 内容最容易转化成真实交易量？'},
+  {term:'Stablecoin Dominance', subtitle:'稳定币主导率', def:'USDT/USDC 等稳定币占加密总市值的百分比。\n\n稳定币占比↑ = 资金在避险，市场谨慎\n稳定币占比↓ = 资金在入场，risk-on 情绪\n\n这是判断整体市场情绪的宏观指标。', q:'为什么追踪稳定币占比对预判交易所成交量有帮助？'},
+  {term:'BTC Dominance', subtitle:'比特币主导权', def:'BTC市值占全部加密货币总市值的百分比。\n\nBTC.D↑ = 资金集中BTC，altcoin 表现差\nBTC.D↓ = 资金流向 altcoin，可能是 altseason\n\n判断当前该关注哪个赛道的关键指标。', q:'BTC Dominance 的变化如何影响 LBank 的上币策略？'},
+  {term:'Launchpool', subtitle:'新币首发质押', def:'交易所推出的新代币首发机制。用户质押平台币或稳定币，赚取新代币奖励。\n\n对交易所的价值：\n→ 锁定用户资产提升留存\n→ 提升平台币需求\n→ 制造新代币首发热度', q:'为什么 Launchpool 能提升交易所用户留存率？'},
+  {term:'Copy Trading', subtitle:'跟单交易', def:'自动复制某个交易员的开仓平仓操作。\n\n对交易所的价值：\n→ 吸引不擅长交易的用户\n→ 顶级交易员成为内容生产者\n→ 整体成交量增加\n\nBybit 和 OKX 在这块做得很成熟。', q:'如果 LBank 要推 Copy Trading，最重要的设计细节是什么？'},
+];
+
+const EXCHANGES = ['Binance','Bybit','OKX','Bitget','Hyperliquid','Gate.io','LBank 自查'];
+const EX_GUIDES = [
+  'Binance — 访问 binance.com，重点看首页 banner 在推什么、Launchpool 活动和 Futures 页面设计。',
+  'Bybit — 重点研究他们的 Copy Trading 功能，观察 trader 排行榜如何设计，这是他们的核心差异化。',
+  'OKX — 关注他们的 Web3 钱包整合，看看他们如何把 DeFi 和 CeFi 结合，这是行业趋势。',
+  'Bitget — 他们在 LATAM 和 CIS 地区扩张积极，重点看 Affiliate 页面和返佣层级结构。',
+  'Hyperliquid — 纯链上 Perp DEX，无 KYC，用户体验接近 CEX。思考：对 LBank 是威胁还是机会？',
+  'Gate.io — 代币种类最多，是 altcoin 玩家首选。研究他们的上币速度和社区运营策略。',
+  'LBank 自查 — 用新用户视角打开 LBank App，记录3个做得好的地方和3个可以改进的地方。',
+];
+
+const TODAY = new Date();
+const TODAY_KEY = TODAY.toISOString().slice(0,10);
+
+// ══════════════════ STATE ══════════════════
+let S = { tasks:{}, notes:{}, concepts:[], kols:[] };
+function loadS() {
+  const r = localStorage.getItem('intel_gold_v1');
+  if (r) try { S = JSON.parse(r); } catch(e) {}
+  if (!S.tasks) S.tasks={};
+  if (!S.notes) S.notes={};
+  if (!S.concepts) S.concepts=[];
+  if (!S.kols) S.kols=[];
+}
+function saveS() {
+  document.querySelectorAll('textarea[id],input[id]').forEach(el => {
+    if (el.id && !['chat-in','new-term','new-def','new-rel'].includes(el.id)) S.notes[el.id] = el.value;
+  });
+  localStorage.setItem('intel_gold_v1', JSON.stringify(S));
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1500);
+}
+function restoreNotes() {
+  Object.keys(S.notes).forEach(k => {
+    const el = document.getElementById(k);
+    if (el) el.value = S.notes[k];
+  });
+  const tasks = document.querySelectorAll('.task');
+  tasks.forEach((el,i) => {
+    if (S.tasks[TODAY_KEY] && S.tasks[TODAY_KEY]['t'+i]) el.classList.add('done');
+  });
+}
+
+// ══════════════════ INIT HEADER ══════════════════
+function initHeader() {
+  const h = TODAY.getHours();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('tb-date').textContent = `${days[TODAY.getDay()]} ${TODAY.getDate()} ${months[TODAY.getMonth()]}`;
+
+  let greet = 'Good Morning';
+  if (h>=12&&h<17) greet='Good Afternoon';
+  else if (h>=17) greet='Good Evening';
+  document.getElementById('hero-greeting').textContent = greet;
+
+  // Exchange rotation
+  const dow = TODAY.getDay(); // 0=sun
+  const exIdx = dow === 0 ? 6 : dow-1;
+  document.getElementById('ex-name-display').textContent = EXCHANGES[exIdx % EXCHANGES.length];
+  document.getElementById('ex-guide-text').textContent = EX_GUIDES[exIdx % EX_GUIDES.length];
+
+  // Concept
+  const doy = Math.floor((TODAY - new Date(TODAY.getFullYear(),0,0))/86400000);
+  const ci = (doy-1) % CONCEPTS.length;
+  const c = CONCEPTS[ci];
+  document.getElementById('c-term').textContent = c.term + '　' + c.subtitle;
+  document.getElementById('c-def').textContent = c.def;
+  document.getElementById('c-q').textContent = '❓ ' + c.q;
+  document.getElementById('concept-sec-sub').textContent = `今天：${c.term}`;
+  document.getElementById('concept-badge-text').textContent = S.concepts.length + ' 概念';
+}
+
+// ══════════════════ DATE SCROLL ══════════════════
+function buildDateScroll() {
+  const wrap = document.getElementById('date-scroll');
+  const dayNames = ['日','一','二','三','四','五','六'];
+  for (let i=-6; i<=1; i++) {
+    const d = new Date(TODAY);
+    d.setDate(TODAY.getDate()+i);
+    const key = d.toISOString().slice(0,10);
+    const chip = document.createElement('div');
+    chip.className = 'date-chip' + (key===TODAY_KEY?' active':'');
+    chip.innerHTML = `<div class="dc-day">周${dayNames[d.getDay()]}</div><div class="dc-num">${d.getDate()}</div><div class="dc-dot"></div>`;
+    wrap.appendChild(chip);
+  }
+}
+
+// ══════════════════ PROGRESS ══════════════════
+function updateProgress() {
+  const all = document.querySelectorAll('#page-today .task');
+  const done = document.querySelectorAll('#page-today .task.done');
+  const pct = all.length ? Math.round(done.length/all.length*100) : 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-num').textContent = pct+'%';
+}
+
+// ══════════════════ TASKS ══════════════════
+function toggleTask(el, g, i) {
+  el.classList.toggle('done');
+  if (!S.tasks[TODAY_KEY]) S.tasks[TODAY_KEY]={};
+  const allTasks = document.querySelectorAll('.task');
+  let globalIdx = 0;
+  allTasks.forEach((t,j)=>{ if(t===el) globalIdx=j; });
+  S.tasks[TODAY_KEY]['t'+globalIdx] = el.classList.contains('done');
+  updateProgress();
+  saveS();
+}
+
+// ══════════════════ SECTIONS ══════════════════
+function toggleSec(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ══════════════════ PAGES ══════════════════
+function switchPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='records') renderRecords();
+  saveS();
+}
+
+// ══════════════════ RECORDS ══════════════════
+function renderRecords() {
+  // Concepts
+  const arcList = document.getElementById('concept-archive-list');
+  arcList.innerHTML = '';
+  const allC = [...CONCEPTS.slice(0,3).map((c,i)=>({term:c.term+'　'+c.subtitle,def:c.def,rel:'→ '+c.q,date:'内置 Day '+(i+1)})),...S.concepts];
+  document.getElementById('concept-badge-text').textContent = S.concepts.length+' 概念';
+  allC.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='concept-arc-item';
+    d.innerHTML=`<div class="cai-top"><span class="cai-term">${c.term}</span><span class="cai-date">${c.date||''}</span></div><div class="cai-def">${c.def}</div>${c.rel?`<div class="cai-q">${c.rel}</div>`:''}`;
+    arcList.appendChild(d);
+  });
+
+  // KOLs
+  const kolWrap = document.getElementById('kol-list-wrap');
+  kolWrap.innerHTML='';
+  S.kols.forEach((k,i)=>{
+    const d=document.createElement('div');
+    d.className='kol-item';
+    d.innerHTML=`
+      <div class="kol-top"><span class="kol-handle">${k.handle||'@KOL '+(i+1)}</span></div>
+      <div class="kol-grid">
+        <div class="kol-cell"><label>地区</label><input value="${k.region||''}" placeholder="CN/TR/ID" onchange="S.kols[${i}].region=this.value;saveS()"></div>
+        <div class="kol-cell"><label>平台</label><input value="${k.platform||''}" placeholder="X/YouTube/TG" onchange="S.kols[${i}].platform=this.value;saveS()"></div>
+        <div class="kol-cell"><label>粉丝量</label><input value="${k.followers||''}" placeholder="50K" onchange="S.kols[${i}].followers=this.value;saveS()"></div>
+        <div class="kol-cell"><label>Volume 质量</label><input value="${k.quality||''}" placeholder="High/Med/Low" onchange="S.kols[${i}].quality=this.value;saveS()"></div>
+      </div>
+      <textarea class="kol-note" rows="2" placeholder="观察笔记..." onchange="S.kols[${i}].note=this.value;saveS()">${k.note||''}</textarea>
+    `;
+    kolWrap.appendChild(d);
+  });
+
+  // Notes summary
+  const ns = document.getElementById('notes-summary');
+  ns.innerHTML='';
+  const noteMap = {
+    'n-morning':'早上市场笔记','n-exchange':'竞品观察','n-concept':'概念理解',
+    'mn1':'Market Note 第1行','mn2':'第2行','mn3':'第3行'
+  };
+  let any=false;
+  Object.entries(noteMap).forEach(([k,lbl])=>{
+    const v=S.notes[k];
+    if(v&&v.trim()){
+      any=true;
+      const d=document.createElement('div');
+      d.className='concept-arc-item';
+      d.style.marginBottom='8px';
+      d.innerHTML=`<div class="cai-top"><span class="cai-term" style="font-size:13px">${lbl}</span><span class="cai-date">${TODAY_KEY}</span></div><div class="cai-def">${v.replace(/\n/g,'<br>')}</div>`;
+      ns.appendChild(d);
+    }
+  });
+  if(!any){
+    ns.innerHTML='<div style="font-size:12px;color:var(--t4);font-family:var(--mono);padding:16px;text-align:center">今天还没有笔记，去任务页面写一些吧 ✦</div>';
+  }
+}
+
+function addConcept() {
+  const term=document.getElementById('new-term').value.trim();
+  const def=document.getElementById('new-def').value.trim();
+  const rel=document.getElementById('new-rel').value.trim();
+  if(!term) return;
+  S.concepts.push({term,def,rel,date:TODAY_KEY});
+  saveS();
+  document.getElementById('new-term').value='';
+  document.getElementById('new-def').value='';
+  document.getElementById('new-rel').value='';
+  renderRecords();
+}
+
+function addKol() {
+  S.kols.push({handle:'@新KOL',region:'',platform:'',followers:'',quality:'',note:''});
+  saveS();
+  switchPage('records',document.querySelectorAll('.nav-btn')[1]);
+  setTimeout(()=>{
+    const kolWrap=document.getElementById('kol-list-wrap');
+    if(kolWrap.lastChild) kolWrap.lastChild.scrollIntoView({behavior:'smooth'});
+  },100);
+}
+
+// ══════════════════ REPORT ══════════════════
+function exportReport() {
+  const d=new Date().toLocaleDateString('zh-CN');
+  let txt=`WEEKLY MARKET INTELLIGENCE BRIEF\n${d}\n${'─'.repeat(42)}\n\n`;
+  [['r1','MARKET STRUCTURE'],['r2','SECTOR ROTATION'],['r3','EXCHANGE MOVES'],['r4','AFFILIATE SIGNALS'],['r5','LBANK OPPORTUNITY'],['r6','MACRO']].forEach(([id,lbl])=>{
+    const el=document.getElementById(id);
+    if(el&&el.value.trim()) txt+=`${lbl}\n${el.value.trim()}\n\n`;
+  });
+  txt+=`${'─'.repeat(42)}\nINTEL · LBank Market Intelligence`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download=`brief_${TODAY_KEY}.txt`;
+  a.click();
+}
+
+// ══════════════════ AI CHAT ══════════════════
+function qAsk(q) {
+  switchPage('ai',document.querySelectorAll('.nav-btn')[3]);
+  document.getElementById('chat-in').value=q;
+  setTimeout(sendMsg,150);
+}
+
+async function sendMsg() {
+  const inp=document.getElementById('chat-in');
+  const msg=inp.value.trim();
+  if(!msg) return;
+  inp.value=''; inp.style.height='auto';
+  document.getElementById('send-gem').disabled=true;
+
+  appendMsg('user',msg);
+
+  const typId='t_'+Date.now();
+  const td=document.createElement('div');
+  td.id=typId; td.className='cmsg ai';
+  td.innerHTML=`<div class="cmsg-av">✦</div><div class="cmsg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  document.getElementById('chat-msgs').appendChild(td);
+  scrollMsgs();
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`你是一个亲切、耐心的 crypto 金融学习助手，专门帮助 LBank 的初级员工理解市场概念。
+
+用户背景：
+- 在 LBank 工作，岗位是 Digital Asset Market Intelligence / Growth Operations
+- 完全零基础，正在学习 crypto 市场分析、衍生品、竞品分析和 affiliate 增长
+- 需要温暖鼓励，不要让她感到挫败
+
+回答风格：
+- 用中文回答
+- 用口语化简单语言，避免堆砌专业术语
+- 每个概念必须举一个具体生活化的例子
+- 最后一句话总是联系到她的工作（LBank、交易所运营、增长）
+- 回答精简，不超过280字
+- 今天是 ${TODAY.toLocaleDateString('zh-CN')} ${['周日','周一','周二','周三','周四','周五','周六'][TODAY.getDay()]}`,
+        messages:[{role:'user',content:msg}]
+      })
+    });
+    const data=await res.json();
+    document.getElementById(typId).remove();
+    appendMsg('ai', data.content?.[0]?.text || '网络有点问题，稍后再试 🙏');
+  } catch(e) {
+    document.getElementById(typId).remove();
+    appendMsg('ai','网络连接有点问题，请稍后再试 🙏');
+  }
+  document.getElementById('send-gem').disabled=false;
+}
+
+function appendMsg(role,text) {
+  const msgs=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  d.className='cmsg '+role;
+  d.innerHTML=`<div class="cmsg-av">${role==='ai'?'✦':'◆'}</div><div class="cmsg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(d);
+  scrollMsgs();
+}
+function scrollMsgs() {
+  const m=document.getElementById('chat-msgs');
+  m.scrollTop=m.scrollHeight;
+}
+
+// ══════════════════ AUTO SAVE ══════════════════
+document.addEventListener('input', saveS);
+
+// ══════════════════ BOOT ══════════════════
+loadS();
+initHeader();
+buildDateScroll();
+restoreNotes();
+updateProgress();
+</script>
+</body>
+</html>
