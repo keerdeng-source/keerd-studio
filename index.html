@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#1A1A1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>柴犬学习站</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+:root{
+  --ink:#1A1A1A;--ink2:#3A3A3A;--ink3:#777;--ink4:#AAA;--ink5:#CCC;
+  --line:rgba(0,0,0,0.07);--line2:rgba(0,0,0,0.13);
+  --paper:#FAFAF8;--paper2:#F3F2EE;--paper3:#E9E7E1;
+  --warm:#F0EDE6;--card:#FFFFFF;
+  --green:#2A6E48;--red:#B03030;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans','Noto Serif SC',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+
+/* ══ AUTH ══ */
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper);}
+.auth-box{width:390px;max-width:94vw;background:var(--card);border-radius:20px;padding:2.4rem 2rem;border:1px solid var(--line2);}
+.auth-shiba{display:flex;justify-content:center;margin-bottom:1.3rem;}
+.auth-h{font-size:1.4rem;font-weight:600;text-align:center;letter-spacing:-.02em;}
+.auth-sub{text-align:center;color:var(--ink3);font-size:.83rem;margin:.3rem 0 1.7rem;}
+label{display:block;font-size:.7rem;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.38rem;}
+input[type=email],input[type=password],input[type=text],textarea{width:100%;padding:.72rem .95rem;border:1.5px solid var(--line2);border-radius:9px;font-family:inherit;font-size:.9rem;background:var(--paper);color:var(--ink);outline:none;transition:border-color .18s;}
+input:focus,textarea:focus{border-color:var(--ink);}
+.fg{margin-bottom:.95rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:.75rem 1.3rem;border-radius:9px;border:none;font-family:inherit;font-size:.87rem;font-weight:500;cursor:pointer;transition:all .14s;}
+.btn-fill{background:var(--ink);color:white;}.btn-fill:hover{background:#333;}
+.btn-ghost{background:var(--warm);color:var(--ink);}.btn-ghost:hover{background:var(--paper3);}
+.btn-full{width:100%;margin-top:.3rem;}
+.paw-hint{text-align:center;font-size:.77rem;color:var(--ink3);margin-top:1rem;font-style:italic;}
+
+/* ══ APP SHELL ══ */
+#app{display:none;}
+.topbar{position:sticky;top:0;z-index:100;height:52px;background:rgba(250,250,248,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;}
+.topbar-left{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.96rem;}
+.streak{background:var(--warm);padding:.28rem .7rem;border-radius:20px;font-size:.78rem;font-weight:600;color:var(--ink);}
+.topbar-user{font-size:.78rem;color:var(--ink3);cursor:pointer;padding:.28rem .55rem;border-radius:7px;}
+.topbar-user:hover{background:var(--warm);color:var(--ink);}
+.content{max-width:820px;margin:0 auto;padding:1.2rem 1rem 5.5rem;}
+.page{display:none;}.page.on{display:block;}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(250,250,248,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:100;}
+.nv{flex:1;display:flex;flex-direction:column;align-items:center;padding:.58rem .3rem;gap:2px;border:none;background:none;font-family:inherit;font-size:.63rem;color:var(--ink3);cursor:pointer;transition:color .14s;}
+.nv svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.nv.on{color:var(--ink);}
+
+.sec{font-size:.69rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:.85rem;margin-top:1.4rem;}
+.sec:first-child{margin-top:0;}
+
+/* ══ TODAY ══ */
+.greet{background:var(--ink);border-radius:15px;padding:1.4rem;color:white;display:flex;align-items:center;gap:1.1rem;margin-bottom:1.2rem;overflow:hidden;position:relative;}
+.greet::after{content:'';position:absolute;right:-15px;top:-15px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.04);}
+.greet h2{font-size:1.05rem;font-weight:600;margin-bottom:.18rem;}
+.greet p{font-size:.79rem;opacity:.55;}
+
+/* WSJ */
+.wsj-box{background:var(--card);border:1px solid var(--line2);border-radius:13px;padding:1.05rem 1.2rem;margin-bottom:1rem;}
+.wsj-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;}
+.wsj-badge{font-size:.64rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);}
+.wsj-go{font-size:.72rem;color:var(--ink3);text-decoration:none;display:flex;align-items:center;gap:3px;}
+.wsj-go:hover{color:var(--ink);}
+.wsj-item{display:flex;gap:.82rem;padding:.62rem 0;border-bottom:1px solid var(--line);}
+.wsj-item:last-child{border-bottom:none;padding-bottom:0;}
+.wsj-n{font-size:.67rem;font-weight:600;color:var(--ink4);min-width:14px;margin-top:2px;}
+.wsj-cat{font-size:.63rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--ink3);margin-bottom:2px;}
+.wsj-t{font-size:.87rem;font-weight:500;line-height:1.4;}
+.wsj-why{font-size:.74rem;color:var(--ink3);margin-top:2px;}
+
+/* INDEX LEARNING */
+.idx-plan{background:var(--card);border:1px solid var(--line2);border-radius:13px;overflow:hidden;margin-bottom:1rem;}
+.idx-plan-hd{padding:.9rem 1.1rem;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+.idx-plan-title{font-weight:600;font-size:.88rem;}
+.idx-tabs{display:flex;border-bottom:1px solid var(--line);}
+.idx-tab{flex:1;padding:.6rem;text-align:center;font-size:.76rem;font-weight:500;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;transition:all .14s;}
+.idx-tab.on{color:var(--ink);border-bottom-color:var(--ink);}
+.idx-body{padding:1rem 1.1rem;}
+.idx-name{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:.25rem;}
+.idx-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:.7rem;}
+.idx-desc{font-size:.87rem;line-height:1.72;color:var(--ink2);margin-bottom:.85rem;}
+.idx-why-title{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:.4rem;}
+.idx-why-item{display:flex;gap:.6rem;align-items:flex-start;font-size:.82rem;margin-bottom:.38rem;color:var(--ink2);}
+.idx-why-dot{width:5px;height:5px;border-radius:50%;background:var(--ink);margin-top:.45rem;flex-shrink:0;}
+.idx-ref{margin-top:.85rem;display:flex;align-items:center;gap:.5rem;}
+.idx-ref a{font-size:.77rem;color:var(--ink3);text-decoration:none;padding:.28rem .7rem;border:1px solid var(--line2);border-radius:20px;}
+.idx-ref a:hover{border-color:var(--ink);color:var(--ink);}
+.idx-nav{display:flex;gap:.5rem;margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--line);}
+.idx-nav-btn{flex:1;padding:.5rem;text-align:center;font-size:.75rem;color:var(--ink3);background:none;border:1px solid var(--line2);border-radius:8px;cursor:pointer;font-family:inherit;}
+.idx-nav-btn:hover{border-color:var(--ink);color:var(--ink);}
+.idx-progress{display:flex;gap:3px;padding:.75rem 1.1rem;background:var(--paper2);}
+.idx-dot{width:8px;height:8px;border-radius:50%;background:var(--paper3);transition:background .2s;}
+.idx-dot.done{background:var(--ink);}
+
+/* Market */
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:7px;}
+.mkt-card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:.78rem .92rem;text-decoration:none;display:block;position:relative;transition:border-color .14s;}
+.mkt-card:hover{border-color:var(--line2);}
+.mkt-ext{position:absolute;top:6px;right:6px;opacity:.15;}
+.mkt-name{font-size:.63rem;font-weight:500;color:var(--ink3);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.04em;}
+.mkt-val{font-size:.95rem;font-weight:600;color:var(--ink);}
+.mkt-note{font-size:.65rem;color:var(--ink4);margin-top:.12rem;}
+
+/* FX */
+.fx-row{display:flex;gap:7px;}
+.fx-card{flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:.78rem .92rem;text-align:center;text-decoration:none;display:block;transition:border-color .14s;}
+.fx-card:hover{border-color:var(--line2);}
+.fx-pair{font-size:.62rem;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem;}
+.fx-val{font-size:.95rem;font-weight:700;color:var(--ink);}
+.fx-note{font-size:.64rem;color:var(--ink4);margin-top:.1rem;}
+
+/* Tasks */
+.task-list{display:flex;flex-direction:column;gap:6px;}
+.task-item{display:flex;align-items:center;gap:.82rem;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:.8rem .95rem;cursor:pointer;transition:border-color .14s;}
+.task-item:hover{border-color:var(--line2);}
+.task-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--warm);}
+.task-ic svg{width:17px;height:17px;}
+.task-info{flex:1;}
+.task-name{font-weight:500;font-size:.86rem;}
+.task-sub{font-size:.73rem;color:var(--ink3);margin-top:1px;}
+.badge{font-size:.64rem;font-weight:600;padding:.18rem .58rem;border-radius:20px;white-space:nowrap;}
+.b-d{background:var(--warm);color:var(--ink2);}
+.b-g{background:#E3F0EA;color:var(--green);}
+
+/* ══ ARTICLE PAGE - Newspaper mode ══ */
+.paste-area{background:var(--card);border:1.5px dashed var(--line2);border-radius:13px;padding:1.15rem;margin-bottom:.95rem;}
+.paste-area:focus-within{border-color:var(--ink);border-style:solid;}
+.paste-area textarea{width:100%;min-height:155px;border:none;background:transparent;font-family:'Crimson Pro',Georgia,serif;font-size:1.05rem;line-height:1.88;resize:vertical;color:var(--ink);padding:0;}
+.paste-hint{font-size:.76rem;color:var(--ink3);margin-bottom:.55rem;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;margin-bottom:1.1rem;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:.36rem .82rem;border-radius:20px;border:1.5px solid var(--line2);background:var(--card);font-family:inherit;font-size:.77rem;font-weight:500;cursor:pointer;color:var(--ink3);white-space:nowrap;transition:all .14s;}
+.tab.on{background:var(--ink);color:white;border-color:var(--ink);}
+.tc{display:none;}.tc.on{display:block;}
+
+/* ── VOCAB - newspaper style, bigger ── */
+.vocab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.vc{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:1.1rem 1.2rem;border-left:2.5px solid var(--ink);}
+.vc-word{font-family:'DM Serif Display',serif;font-size:1.35rem;font-weight:400;letter-spacing:-.01em;margin-bottom:3px;}
+.vc-pho{font-size:.82rem;color:var(--ink3);font-style:italic;margin-bottom:5px;}
+.vc-pos{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--warm);color:var(--ink2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.03em;}
+.vc-cn{font-size:1rem;font-weight:500;color:var(--ink);margin-bottom:.3rem;}
+.vc-en{font-size:.87rem;color:var(--ink3);font-style:italic;margin-bottom:.55rem;font-family:'Crimson Pro',serif;line-height:1.55;}
+.vc-ex{font-size:.9rem;color:var(--ink2);font-style:italic;font-family:'Crimson Pro',serif;margin-bottom:.7rem;line-height:1.6;padding-left:.7rem;border-left:2px solid var(--paper3);}
+.save-chip{padding:.3rem .78rem;border-radius:7px;border:1px solid var(--line2);background:white;font-size:.74rem;font-family:inherit;cursor:pointer;color:var(--ink3);transition:all .14s;}
+.save-chip:hover{border-color:var(--ink);color:var(--ink);background:var(--warm);}
+
+/* ── ECON TERMS with context analysis ── */
+.econ-term-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.3rem;margin-bottom:10px;}
+.etc-term{font-family:'DM Serif Display',serif;font-size:1.2rem;margin-bottom:3px;}
+.etc-cn{font-size:.9rem;color:var(--ink3);margin-bottom:.7rem;}
+.etc-section{margin-bottom:.75rem;}
+.etc-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:.3rem;}
+.etc-text{font-size:.9rem;line-height:1.72;color:var(--ink2);}
+.etc-context{background:var(--paper2);border-radius:8px;padding:.65rem .85rem;font-size:.88rem;line-height:1.68;color:var(--ink);font-style:italic;}
+.etc-think{background:var(--warm);border-radius:8px;padding:.65rem .85rem;}
+.etc-think-q{font-size:.86rem;color:var(--ink2);margin-bottom:.28rem;line-height:1.5;}
+.etc-think-q::before{content:'→ ';}
+
+/* ── BILINGUAL - NEWSPAPER MODE ── */
+.article-date{font-size:.77rem;color:var(--ink3);text-align:center;margin-bottom:1.1rem;letter-spacing:.05em;text-transform:uppercase;}
+.bi-para{margin-bottom:1.8rem;}
+.bi-en-text{font-family:'Crimson Pro',Georgia,serif;font-size:1.13rem;line-height:1.95;color:var(--ink);margin-bottom:.6rem;}
+.bi-cn-hidden{display:none;font-size:.92rem;line-height:1.88;color:var(--ink3);font-family:'Noto Serif SC',serif;padding:.7rem .9rem;background:var(--paper2);border-radius:8px;margin-bottom:.4rem;}
+.bi-cn-hidden.visible{display:block;}
+.bi-toggle{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;color:var(--ink4);cursor:pointer;user-select:none;transition:color .14s;border:none;background:none;font-family:inherit;padding:0;}
+.bi-toggle:hover{color:var(--ink3);}
+.bi-toggle svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.5;fill:none;}
+.bi-sum{margin-top:.5rem;padding:.5rem .8rem;background:var(--warm);border-radius:7px;font-size:.82rem;color:var(--ink2);border-left:2px solid var(--ink);}
+.bi-sum-toggle{font-size:.7rem;color:var(--ink4);cursor:pointer;margin-top:.3rem;display:inline-block;}
+.bi-sum-hidden{display:none;}.bi-sum-hidden.visible{display:block;}
+
+/* ── SUMMARY - self first ── */
+.summary-write-area{margin-bottom:1.2rem;}
+.summary-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:.5rem;}
+.big-textarea{width:100%;min-height:130px;padding:1rem;border:1.5px solid var(--line2);border-radius:11px;font-family:'Noto Serif SC',serif;font-size:.95rem;line-height:1.9;resize:vertical;outline:none;background:white;transition:border-color .18s;}
+.big-textarea:focus{border-color:var(--ink);}
+.ai-eval-box{background:var(--paper2);border-radius:10px;padding:.9rem 1rem;margin-top:.6rem;border-left:2.5px solid var(--ink);}
+.ai-eval-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:.4rem;}
+.ai-eval-text{font-size:.88rem;line-height:1.72;color:var(--ink2);}
+.ai-sum-hidden{display:none;margin-top:.8rem;}
+.ai-sum-hidden.visible{display:block;}
+.ai-sum-box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.9rem 1rem;}
+.ai-sum-en{font-family:'Crimson Pro',serif;font-size:1rem;line-height:1.88;margin-bottom:.7rem;padding-bottom:.7rem;border-bottom:1px solid var(--line);}
+.ai-sum-cn{font-size:.88rem;line-height:1.82;color:var(--ink3);}
+
+/* ── QUIZ bigger ── */
+.quiz-item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.3rem;margin-bottom:10px;}
+.quiz-sent{font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;line-height:1.9;margin-bottom:.75rem;}
+.quiz-blank{display:inline-block;min-width:80px;border-bottom:2px solid var(--ink);padding:0 5px;color:var(--ink2);font-weight:600;}
+.qi{width:100%;margin-bottom:7px;font-size:.95rem;padding:.75rem 1rem;}
+.qi.ok{border-color:var(--green);background:#F0FFF6;}
+.qi.no{border-color:var(--red);background:#FFF4F4;}
+.chk-btn{padding:.42rem 1rem;border-radius:8px;border:none;background:var(--ink);color:white;font-family:inherit;font-size:.8rem;cursor:pointer;font-weight:500;}
+
+/* ── GRAMMAR bigger, AI eval ── */
+.gram-item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:10px;}
+.gram-pattern-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);margin-bottom:3px;}
+.gram-ex{font-family:'Crimson Pro',serif;font-size:1rem;color:var(--ink2);font-style:italic;margin-bottom:.45rem;line-height:1.65;}
+.gram-cn{font-size:.85rem;color:var(--ink3);margin-bottom:.75rem;line-height:1.6;}
+.gram-input{width:100%;padding:.82rem 1rem;border:1.5px solid var(--line2);border-radius:9px;font-family:'Crimson Pro',serif;font-size:1.05rem;outline:none;background:white;transition:border-color .18s;line-height:1.6;}
+.gram-input:focus{border-color:var(--ink);}
+.gram-btns{display:flex;gap:6px;margin-top:.55rem;}
+.gram-eval-box{margin-top:.6rem;background:var(--paper2);border-radius:9px;padding:.82rem .95rem;border-left:2.5px solid var(--ink);display:none;}
+.gram-eval-box.visible{display:block;}
+.gram-eval-text{font-size:.87rem;line-height:1.72;color:var(--ink2);}
+
+/* ── ECON ANALYSIS ── */
+.econ-box{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:1.1rem 1.2rem;margin-bottom:9px;}
+.econ-label{font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink2);font-weight:600;margin-bottom:.48rem;}
+.econ-text{font-size:.93rem;line-height:1.88;}
+
+/* ── FLASHCARDS ── */
+.stats-row{display:flex;gap:7px;margin-bottom:1.1rem;}
+.stat-box{flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:.82rem;text-align:center;}
+.stat-n{font-size:1.5rem;font-weight:700;color:var(--ink);}
+.stat-l{font-size:.67rem;color:var(--ink3);margin-top:2px;}
+.ebb{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:.92rem 1.05rem;margin-bottom:1.1rem;}
+.ebb-title{font-size:.82rem;font-weight:600;margin-bottom:2px;}
+.ebb-sub{font-size:.7rem;color:var(--ink3);margin-bottom:.75rem;}
+.ebb-line{display:flex;gap:5px;}
+.ebb-day{flex:1;text-align:center;font-size:.63rem;color:var(--ink3);}
+.ebb-dot{width:26px;height:26px;border-radius:50%;margin:0 auto 2px;display:flex;align-items:center;justify-content:center;font-size:.63rem;font-weight:600;}
+.d-t{background:var(--ink);color:white;}.d-s{background:var(--warm);color:var(--ink2);}.d-f{background:var(--paper3);color:var(--ink3);}.d-d{background:#E3F0EA;color:var(--green);}
+.fc-wrap{perspective:1000px;margin-bottom:1.1rem;cursor:pointer;}
+.fc{width:100%;height:195px;position:relative;transform-style:preserve-3d;transition:transform .44s cubic-bezier(.4,0,.2,1);}
+.fc.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;inset:0;border-radius:13px;border:1px solid var(--line2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.7rem;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.fc-front{background:var(--card);}.fc-back{background:var(--warm);transform:rotateY(180deg);}
+.fc-word{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--ink);margin-bottom:4px;}
+.fc-hint{font-size:.73rem;color:var(--ink3);}
+.fc-meaning{font-size:1.05rem;color:var(--ink);text-align:center;margin-bottom:5px;}
+.fc-ex{font-size:.82rem;color:var(--ink3);font-style:italic;text-align:center;font-family:'Crimson Pro',serif;}
+.rate-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;}
+.rate-btn{padding:.56rem .95rem;border-radius:9px;border:1px solid var(--line2);background:var(--card);font-family:inherit;font-weight:500;font-size:.82rem;cursor:pointer;transition:all .12s;color:var(--ink);}
+.rate-btn:hover{border-color:var(--ink);background:var(--warm);}
+
+/* ── CRYPTO ── */
+.crypto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:7px;margin-bottom:1.1rem;}
+.crypto-card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:.78rem .92rem;text-decoration:none;display:block;transition:border-color .14s;}
+.crypto-card:hover{border-color:var(--line2);}
+.cr-sym{font-weight:700;font-size:.9rem;color:var(--ink);}
+.cr-full{font-size:.67rem;color:var(--ink3);margin-bottom:4px;}
+.cr-price{font-size:.97rem;font-weight:700;color:var(--ink);}
+.cr-note{font-size:.63rem;color:var(--ink4);margin-top:.1rem;}
+
+/* WOD */
+.wod{background:var(--ink);border-radius:13px;padding:1.4rem;color:white;margin-bottom:1.1rem;position:relative;overflow:hidden;}
+.wod::before{content:'"';position:absolute;font-family:'DM Serif Display',serif;font-size:8rem;color:rgba(255,255,255,.04);top:-12px;right:16px;line-height:1;pointer-events:none;}
+.wod-label{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-bottom:.38rem;font-weight:600;}
+.wod-word{font-family:'DM Serif Display',serif;font-size:1.7rem;margin-bottom:2px;}
+.wod-pho{font-size:.76rem;opacity:.4;margin-bottom:.65rem;}
+.wod-def{font-size:.88rem;opacity:.82;line-height:1.65;margin-bottom:5px;}
+.wod-cn{font-size:.8rem;opacity:.42;line-height:1.6;}
+
+/* LOOKUP */
+.lookup-sec{background:var(--card);border:1px solid var(--line2);border-radius:13px;padding:1.1rem 1.2rem;margin-bottom:1.1rem;}
+.lookup-title{font-weight:600;font-size:.9rem;margin-bottom:.28rem;}
+.lookup-sub{font-size:.77rem;color:var(--ink3);margin-bottom:.85rem;line-height:1.55;}
+.lookup-row{display:flex;gap:7px;}
+.lr-word{font-family:'DM Serif Display',serif;font-size:1.25rem;}
+.lr-pho{font-size:.76rem;color:var(--ink3);font-style:italic;margin:2px 0 .6rem;}
+.lr-def{font-size:.9rem;line-height:1.75;}
+.lr-cn{font-size:.83rem;color:var(--ink3);margin-top:.38rem;line-height:1.7;}
+.lr-ex{font-size:.82rem;color:var(--ink2);font-style:italic;font-family:'Crimson Pro',serif;margin-top:.5rem;}
+
+/* QUESTIONS */
+.q-card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:1rem;margin-bottom:8px;position:relative;}
+.q-text{font-size:.9rem;font-weight:500;margin-bottom:.62rem;line-height:1.55;padding-right:1.4rem;}
+.q-del{position:absolute;top:9px;right:9px;background:none;border:none;font-size:.8rem;color:var(--ink3);cursor:pointer;opacity:.3;}
+.q-del:hover{opacity:1;color:var(--red);}
+.ans-area{width:100%;min-height:65px;font-size:.88rem;background:var(--paper2);resize:vertical;}
+.add-q-btn{width:100%;padding:.8rem;border:1.5px dashed var(--line2);border-radius:11px;background:transparent;font-family:inherit;font-size:.82rem;color:var(--ink3);cursor:pointer;transition:all .14s;}
+.add-q-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--warm);}
+
+/* DIARY */
+.diary-entries{display:flex;flex-direction:column;gap:8px;margin-bottom:1.1rem;}
+.diary-entry{background:var(--card);border:1px solid var(--line);border-radius:11px;overflow:hidden;}
+.de-head{display:flex;align-items:center;justify-content:space-between;padding:.78rem 1rem;cursor:pointer;border-bottom:1px solid transparent;}
+.diary-entry.open .de-head{border-bottom-color:var(--line);}
+.de-date{font-weight:600;font-size:.82rem;}
+.de-preview{font-size:.72rem;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46%;}
+.de-mood{font-size:.88rem;}
+.de-body{display:none;padding:.9rem 1rem;}
+.diary-entry.open .de-body{display:block;}
+.de-body pre{font-family:'Noto Serif SC',serif;font-size:.88rem;line-height:1.9;white-space:pre-wrap;}
+.new-diary{background:var(--card);border:1px solid var(--line2);border-radius:13px;padding:1.1rem;margin-bottom:1.1rem;}
+.nd-title{font-weight:600;font-size:.9rem;margin-bottom:.75rem;}
+.diary-meta{display:flex;gap:7px;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;}
+.mood-opt{padding:.28rem .6rem;border-radius:7px;border:1.5px solid var(--line2);background:white;font-size:.85rem;cursor:pointer;transition:all .13s;}
+.mood-opt.sel{border-color:var(--ink);background:var(--warm);}
+.diary-ta{width:100%;min-height:135px;font-family:'Noto Serif SC',serif;font-size:.92rem;line-height:1.88;background:var(--paper2);margin-bottom:.75rem;resize:vertical;}
+
+/* SETTINGS */
+.settings-sec{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:1.1rem;margin-bottom:.9rem;}
+.set-title{font-weight:600;font-size:.9rem;margin-bottom:.28rem;}
+.set-sub{font-size:.77rem;color:var(--ink3);margin-bottom:.9rem;line-height:1.55;}
+.api-row{display:flex;gap:7px;}
+.api-row input{flex:1;font-family:monospace;font-size:.8rem;background:var(--paper2);}
+.api-st{font-size:.74rem;margin-top:5px;}
+.api-st.ok{color:var(--green);}.api-st.no{color:var(--ink3);}
+.how-to{background:var(--paper2);border-radius:8px;padding:.82rem .95rem;margin-top:.75rem;}
+.how-t{font-size:.78rem;font-weight:600;margin-bottom:.45rem;color:var(--ink2);}
+.how-step{display:flex;align-items:flex-start;gap:7px;margin-bottom:4px;font-size:.76rem;}
+.sn{width:16px;height:16px;background:var(--ink);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* OVERLAY / TOAST */
+.overlay{position:fixed;inset:0;background:rgba(26,26,26,.48);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:999;}
+.overlay.on{display:flex;}
+.loading-box{background:white;border-radius:15px;padding:2rem;text-align:center;max-width:240px;width:90%;}
+.loading-shiba{display:block;margin:0 auto .85rem;animation:hop .55s infinite alternate;}
+@keyframes hop{from{transform:translateY(0);}to{transform:translateY(-7px);}}
+.loading-msg{font-size:.84rem;color:var(--ink3);margin-top:.38rem;}
+.loading-note{font-size:.71rem;color:var(--ink4);margin-top:.25rem;}
+.prog-bar{height:2px;background:var(--line);border-radius:2px;margin-top:.6rem;overflow:hidden;}
+.prog-fill{height:100%;background:var(--ink);border-radius:2px;width:0%;transition:width .3s;}
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:white;padding:.6rem 1.2rem;border-radius:20px;font-size:.79rem;opacity:0;transition:all .23s;z-index:200;pointer-events:none;white-space:nowrap;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:600px){.greet{flex-direction:column;text-align:center;}.rate-row .rate-btn{flex:1;}}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px;}
+
+/* SHIBA in settings */
+.shiba-card{display:flex;align-items:center;gap:1rem;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:1.1rem;margin-bottom:.9rem;}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH ══ -->
+<div id="auth-screen">
+<div class="auth-box">
+  <div class="auth-shiba">
+    <!-- Proper Shiba Inu: based on real shiba proportions -->
+    <svg id="shiba-auth" width="90" height="90" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- ── Ears: shiba ears tilt forward slightly ── -->
+      <path d="M28 52 C24 38 20 24 28 14 C33 8 40 12 42 22 C44 30 40 44 36 52Z" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round" fill="white"/>
+      <path d="M29 49 C26 38 23 27 29 19 C32 15 37 18 38 25 C39 31 37 43 34 49Z" stroke="#1A1A1A" stroke-width="1" fill="#F0EDE8" opacity=".7"/>
+      <path d="M92 52 C96 38 100 24 92 14 C87 8 80 12 78 22 C76 30 80 44 84 52Z" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round" fill="white"/>
+      <path d="M91 49 C94 38 97 27 91 19 C88 15 83 18 82 25 C81 31 83 43 86 49Z" stroke="#1A1A1A" stroke-width="1" fill="#F0EDE8" opacity=".7"/>
+      <!-- ── Head: shiba has wide forehead, narrows slightly ── -->
+      <path d="M24 66 C22 50 26 38 34 30 C40 25 50 22 60 22 C70 22 80 25 86 30 C94 38 98 50 96 66 C96 80 88 94 72 98 C68 100 60 101 60 101 C60 101 52 100 48 98 C32 94 24 80 24 66Z" stroke="#1A1A1A" stroke-width="2" fill="white"/>
+      <!-- ── Cream muzzle: shiba signature, wide and prominent ── -->
+      <path d="M38 72 C38 62 46 56 60 56 C74 56 82 62 82 72 C82 84 74 94 60 96 C46 94 38 84 38 72Z" stroke="#1A1A1A" stroke-width="1.5" fill="#F7F5F2"/>
+      <!-- ── Eyes: round, dark, with catchlight. Shiba has slightly slanted eyes ── -->
+      <!-- left eye -->
+      <ellipse cx="42" cy="56" rx="7" ry="6.5" stroke="#1A1A1A" stroke-width="1.8" fill="white"/>
+      <ellipse cx="42" cy="57" rx="4.5" ry="4.2" fill="#1A1A1A"/>
+      <circle cx="40.3" cy="55.2" r="1.5" fill="white"/>
+      <!-- right eye -->
+      <ellipse cx="78" cy="56" rx="7" ry="6.5" stroke="#1A1A1A" stroke-width="1.8" fill="white"/>
+      <ellipse cx="78" cy="57" rx="4.5" ry="4.2" fill="#1A1A1A"/>
+      <circle cx="76.3" cy="55.2" r="1.5" fill="white"/>
+      <!-- ── Eyebrow marks: shiba has forehead markings ── -->
+      <path d="M36 48 Q42 45 48 48" stroke="#1A1A1A" stroke-width="1.2" fill="none" opacity=".25" stroke-linecap="round"/>
+      <path d="M72 48 Q78 45 84 48" stroke="#1A1A1A" stroke-width="1.2" fill="none" opacity=".25" stroke-linecap="round"/>
+      <!-- ── Nose: shiba has a broad, defined nose ── -->
+      <path d="M53 68 C53 64 55.5 62 60 62 C64.5 62 67 64 67 68 C67 71 64.5 73 60 73 C55.5 73 53 71 53 68Z" fill="#1A1A1A"/>
+      <!-- nose highlight -->
+      <path d="M56 66 Q58 64.5 60 65" stroke="white" stroke-width="1" stroke-linecap="round" opacity=".5"/>
+      <!-- ── Mouth: center line then smile ── -->
+      <path d="M60 73 L60 77" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M51 80 Q60 87 69 80" stroke="#1A1A1A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <!-- ── Cheek fur lines (shiba characteristic) ── -->
+      <path d="M28 74 Q31 71 34 73" stroke="#1A1A1A" stroke-width="1" opacity=".22" stroke-linecap="round"/>
+      <path d="M27 78 Q30 75.5 33 77" stroke="#1A1A1A" stroke-width="1" opacity=".22" stroke-linecap="round"/>
+      <path d="M87 74 Q90 71 93 73" stroke="#1A1A1A" stroke-width="1" opacity=".22" stroke-linecap="round"/>
+      <path d="M87 78 Q90 75.5 93 77" stroke="#1A1A1A" stroke-width="1" opacity=".22" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h1 class="auth-h">柴犬学习站</h1>
+  <p class="auth-sub">每天学习，柴犬开心 · 不学习，柴犬生气</p>
+  <div class="fg"><label>邮箱地址</label><input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email"></div>
+  <div class="fg"><label>密码</label><input type="password" id="auth-pw" placeholder="••••••••" autocomplete="current-password"></div>
+  <button class="btn btn-fill btn-full" onclick="doLogin()">进入学习</button>
+  <p class="paw-hint">新邮箱自动注册 · 已有账户直接登录</p>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay">
+  <div class="loading-box">
+    <svg class="loading-shiba" width="54" height="54" viewBox="0 0 120 120" fill="none">
+      <path d="M28 52 C24 38 20 24 28 14 C33 8 40 12 42 22 C44 30 40 44 36 52Z" stroke="#1A1A1A" stroke-width="3" fill="#F5F5F5"/>
+      <path d="M92 52 C96 38 100 24 92 14 C87 8 80 12 78 22 C76 30 80 44 84 52Z" stroke="#1A1A1A" stroke-width="3" fill="#F5F5F5"/>
+      <path d="M24 66 C22 50 26 38 34 30 C40 25 50 22 60 22 C70 22 80 25 86 30 C94 38 98 50 96 66 C96 80 88 94 72 98 C60 101 48 98 32 94 C24 80 24 66 24 66Z" stroke="#1A1A1A" stroke-width="3"/>
+      <path d="M38 72 C38 62 46 56 60 56 C74 56 82 62 82 72 C82 84 74 94 60 96 C46 94 38 84 38 72Z" stroke="#1A1A1A" stroke-width="2" fill="#F7F5F2"/>
+      <ellipse cx="42" cy="56" rx="6" ry="5.5" fill="#1A1A1A"/>
+      <ellipse cx="78" cy="56" rx="6" ry="5.5" fill="#1A1A1A"/>
+      <path d="M53 68 C53 64 55.5 62 60 62 C64.5 62 67 64 67 68 C67 71 64.5 73 60 73 C55.5 73 53 71 53 68Z" fill="#1A1A1A"/>
+    </svg>
+    <div style="font-weight:600;font-size:.9rem;">AI 分析中</div>
+    <div class="loading-msg" id="overlay-msg">正在阅读文章...</div>
+    <div class="loading-note">约需 20–40 秒</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+<header class="topbar">
+  <div class="topbar-left">
+    <svg width="26" height="26" viewBox="0 0 120 120" fill="none">
+      <path d="M28 52 C24 38 20 24 28 14 C33 8 40 12 42 22 C44 30 40 44 36 52Z" stroke="#1A1A1A" stroke-width="4" fill="#F5F5F5"/>
+      <path d="M92 52 C96 38 100 24 92 14 C87 8 80 12 78 22 C76 30 80 44 84 52Z" stroke="#1A1A1A" stroke-width="4" fill="#F5F5F5"/>
+      <path d="M24 66 C22 50 26 38 34 30 C40 25 50 22 60 22 C70 22 80 25 86 30 C94 38 98 50 96 66 C96 80 88 94 60 101 C32 94 24 80 24 66Z" stroke="#1A1A1A" stroke-width="4"/>
+      <ellipse cx="42" cy="57" rx="4.5" ry="4.2" fill="#1A1A1A"/>
+      <ellipse cx="78" cy="57" rx="4.5" ry="4.2" fill="#1A1A1A"/>
+    </svg>
+    柴犬学习站
+  </div>
+  <div style="display:flex;align-items:center;gap:9px;">
+    <div class="streak">🔥 <span id="streak-n">1</span>天</div>
+    <div class="topbar-user" onclick="showPage('settings')"><span id="user-display">用户</span> ▾</div>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ── TODAY ── -->
+<div class="page on" id="page-today">
+  <div class="greet">
+    <div style="flex-shrink:0;">
+      <!-- Greet shiba: white on dark, happy squint -->
+      <svg width="56" height="56" viewBox="0 0 120 120" fill="none">
+        <path d="M28 52 C24 38 20 24 28 14 C33 8 40 12 42 22 C44 30 40 44 36 52Z" stroke="white" stroke-width="2.5" fill="rgba(255,255,255,.08)"/>
+        <path d="M92 52 C96 38 100 24 92 14 C87 8 80 12 78 22 C76 30 80 44 84 52Z" stroke="white" stroke-width="2.5" fill="rgba(255,255,255,.08)"/>
+        <path d="M24 66 C22 50 26 38 34 30 C40 25 50 22 60 22 C70 22 80 25 86 30 C94 38 98 50 96 66 C96 80 88 94 60 101 C32 94 24 80 24 66Z" stroke="white" stroke-width="2.5"/>
+        <path d="M38 72 C38 62 46 56 60 56 C74 56 82 62 82 72 C82 84 74 94 60 96 C46 94 38 84 38 72Z" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>
+        <!-- Happy squint eyes -->
+        <path d="M35 55 Q42 50 49 55" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M71 55 Q78 50 85 55" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="60" cy="68" rx="6" ry="4.2" fill="white" opacity=".88"/>
+        <path d="M51 80 Q60 88 69 80" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <h2 id="greet-title">早上好！开始今天的学习吧</h2>
+      <p id="greet-sub">柴犬在等你 · 今天也要加油</p>
+    </div>
+  </div>
+
+  <div class="sec">今日 WSJ 推荐阅读</div>
+  <div class="wsj-box">
+    <div class="wsj-hd">
+      <span class="wsj-badge">The Wall Street Journal</span>
+      <a class="wsj-go" href="https://www.wsj.com" target="_blank" rel="noopener">打开 WSJ <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+    </div>
+    <div id="wsj-list"></div>
+    <button class="wsj-go" style="margin-top:.75rem;background:none;border:none;cursor:pointer;font-family:inherit;" onclick="refreshWSJ()">↻ 重新生成</button>
+  </div>
+
+  <!-- INDEX LEARNING PLAN -->
+  <div class="sec">今日指数学习 <span style="font-size:.62rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3);">· 每天深入了解一个指数</span></div>
+  <div class="idx-plan">
+    <div class="idx-tabs">
+      <div class="idx-tab on" onclick="switchIdxTab(0,this)">传统市场</div>
+      <div class="idx-tab" onclick="switchIdxTab(1,this)">数字资产</div>
+    </div>
+    <div class="idx-body" id="idx-body"></div>
+    <div class="idx-progress" id="idx-progress"></div>
+  </div>
+
+  <div class="sec">参考行情 <span style="font-size:.62rem;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3);">· 点击查看官方实时数据</span></div>
+  <div class="mkt-grid" id="mkt-grid"></div>
+  <div class="sec" style="margin-top:1.1rem;">汇率参考</div>
+  <div class="fx-row" id="fx-row"></div>
+  <div class="sec" style="margin-top:1.1rem;">今日任务</div>
+  <div class="task-list" id="task-list"></div>
+</div>
+
+<!-- ── ARTICLE ── -->
+<div class="page" id="page-article">
+  <div class="sec" style="margin-top:0;">文章分析</div>
+  <p class="paste-hint">从 WSJ 复制文章内容粘贴，AI 提取高级词汇和经济分析</p>
+  <div class="paste-area"><textarea id="article-ta" placeholder="粘贴文章内容..." oninput="onArticleInput()"></textarea></div>
+  <div style="text-align:center;margin-bottom:1.4rem;">
+    <button class="btn btn-fill" id="analyze-btn" onclick="analyzeArticle()" disabled>开始分析</button>
+  </div>
+  <div id="analysis-out" style="display:none;">
+    <div class="tabs">
+      <button class="tab on" onclick="switchTab('vocab',this)">词汇</button>
+      <button class="tab" onclick="switchTab('econ',this)">经济学</button>
+      <button class="tab" onclick="switchTab('bilingual',this)">读报模式</button>
+      <button class="tab" onclick="switchTab('summary',this)">总结</button>
+      <button class="tab" onclick="switchTab('quiz',this)">填空</button>
+      <button class="tab" onclick="switchTab('grammar',this)">造句</button>
+      <button class="tab" onclick="switchTab('notes',this)">笔记</button>
+    </div>
+    <div class="tc on" id="tc-vocab"><div class="vocab-grid" id="vocab-grid"></div></div>
+    <div class="tc" id="tc-econ"><div id="econ-terms"></div></div>
+    <div class="tc" id="tc-bilingual"><div class="article-date" id="article-date-label"></div><div id="bilingual-out"></div></div>
+    <div class="tc" id="tc-summary">
+      <div class="summary-write-area">
+        <div class="summary-label">先写你自己的总结（英文或中文均可）</div>
+        <textarea class="big-textarea" id="my-summary-en" placeholder="Write a brief summary of the article in English..."></textarea>
+        <div class="summary-label" style="margin-top:.85rem;">中文总结</div>
+        <textarea class="big-textarea" id="my-summary-cn" placeholder="用中文写下你对文章的理解..."></textarea>
+        <button class="btn btn-fill" onclick="evalMySummary()" style="margin-top:.7rem;width:100%;">AI 评估我的总结</button>
+        <div class="ai-eval-box" id="summary-eval" style="display:none;">
+          <div class="ai-eval-label">AI 评估</div>
+          <div class="ai-eval-text" id="summary-eval-text"></div>
+        </div>
+      </div>
+      <div style="margin-top:1.2rem;">
+        <button class="btn btn-ghost" onclick="toggleAISummary()" style="width:100%;justify-content:center;" id="ai-sum-toggle-btn">查看 AI 参考总结</button>
+        <div class="ai-sum-hidden" id="ai-sum-area">
+          <div style="margin-top:.85rem;" class="ai-sum-box">
+            <div class="summary-label">AI 英文总结</div>
+            <div class="ai-sum-en" id="ai-sum-en-text"></div>
+            <div class="summary-label">AI 中文总结</div>
+            <div class="ai-sum-cn" id="ai-sum-cn-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tc" id="tc-quiz">
+      <p style="font-size:.79rem;color:var(--ink3);margin-bottom:1rem;">重点词汇挖空练习</p>
+      <div id="quiz-out"></div>
+      <button class="btn btn-ghost" onclick="checkAll()" style="margin-top:.75rem;">全部核对</button>
+    </div>
+    <div class="tc" id="tc-grammar">
+      <p style="font-size:.79rem;color:var(--ink3);margin-bottom:1rem;">用今天的重点词汇造句，AI 评估语法和用法</p>
+      <div id="grammar-out"></div>
+    </div>
+    <div class="tc" id="tc-notes">
+      <p style="font-size:.79rem;color:var(--ink3);margin-bottom:.75rem;">学习笔记，自动保存</p>
+      <textarea id="note-ta" oninput="autoSaveNote()" class="big-textarea" style="min-height:200px;" placeholder="笔记..."></textarea>
+      <div style="text-align:right;font-size:.7rem;color:var(--ink3);margin-top:3px;" id="note-status">自动保存</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FLASHCARDS ── -->
+<div class="page" id="page-cards">
+  <div class="sec" style="margin-top:0;">复习卡片</div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-n" id="s-due">0</div><div class="stat-l">今日待复习</div></div>
+    <div class="stat-box"><div class="stat-n" id="s-total">0</div><div class="stat-l">总卡片数</div></div>
+    <div class="stat-box"><div class="stat-n" id="s-master">0</div><div class="stat-l">已掌握</div></div>
+  </div>
+  <div class="ebb">
+    <div class="ebb-title">艾宾浩斯遗忘曲线</div>
+    <div class="ebb-sub">学后第 1、3、7、14、30 天复习巩固</div>
+    <div class="ebb-line">
+      <div class="ebb-day"><div class="ebb-dot d-t">今</div>当天</div>
+      <div class="ebb-day"><div class="ebb-dot d-s">+1</div>明天</div>
+      <div class="ebb-day"><div class="ebb-dot d-f">+3</div>3天</div>
+      <div class="ebb-day"><div class="ebb-dot d-f">+7</div>1周</div>
+      <div class="ebb-day"><div class="ebb-dot d-f">+14</div>2周</div>
+      <div class="ebb-day"><div class="ebb-dot d-f">+30</div>1月</div>
+    </div>
+  </div>
+  <div id="no-cards" style="text-align:center;padding:2.5rem;color:var(--ink3);">
+    <svg width="42" height="42" viewBox="0 0 120 120" fill="none" style="display:block;margin:0 auto .7rem;opacity:.2;">
+      <path d="M28 52 C24 38 20 24 28 14 C33 8 40 12 42 22 C44 30 40 44 36 52Z" stroke="#1A1A1A" stroke-width="4"/>
+      <path d="M92 52 C96 38 100 24 92 14 C87 8 80 12 78 22 C76 30 80 44 84 52Z" stroke="#1A1A1A" stroke-width="4"/>
+      <path d="M24 66 C22 50 26 38 34 30 C40 25 50 22 60 22 C70 22 80 25 86 30 C94 38 98 50 96 66 C96 80 88 94 60 101 C32 94 24 80 24 66Z" stroke="#1A1A1A" stroke-width="4"/>
+      <ellipse cx="42" cy="57" rx="5" ry="4.5" fill="#1A1A1A"/><ellipse cx="78" cy="57" rx="5" ry="4.5" fill="#1A1A1A"/>
+    </svg>
+    还没有卡片，先分析一篇文章吧
+  </div>
+  <div id="card-review" style="display:none;">
+    <div style="font-size:.74rem;color:var(--ink3);text-align:center;margin-bottom:.75rem;">点击翻转 · <span id="card-prog">0/0</span></div>
+    <div class="fc-wrap" onclick="flipCard()">
+      <div class="fc" id="fc">
+        <div class="fc-face fc-front"><div class="fc-word" id="fc-front-w">word</div><div class="fc-hint">点击查看释义</div></div>
+        <div class="fc-face fc-back"><div class="fc-meaning" id="fc-back-m">释义</div><div class="fc-ex" id="fc-back-e">example</div></div>
+      </div>
+    </div>
+    <div class="rate-row" id="rate-row" style="display:none;margin-top:.75rem;">
+      <button class="rate-btn" onclick="rateCard(0)">不会</button>
+      <button class="rate-btn" onclick="rateCard(1)">模糊</button>
+      <button class="rate-btn" onclick="rateCard(3)">会了</button>
+      <button class="rate-btn" onclick="rateCard(5)">简单</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DIGITAL ASSETS ── -->
+<div class="page" id="page-crypto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;">
+    <div class="sec" style="margin:0;">数字资产行情</div>
+  </div>
+  <p style="font-size:.74rem;color:var(--ink3);margin-bottom:.85rem;">参考价格，点击进入 CoinMarketCap 查看实时数据</p>
+  <div class="crypto-grid" id="crypto-grid"></div>
+  <div class="lookup-sec">
+    <div class="lookup-title">数字资产词典</div>
+    <div class="lookup-sub">输入任何 crypto / DeFi / 宏观金融术语，AI 给出完整定义</div>
+    <div class="lookup-row">
+      <input type="text" id="lookup-input" placeholder="e.g. Basis Trade, MEV, RWA, QT..." onkeydown="if(event.key==='Enter')lookupWord()">
+      <button class="btn btn-fill" onclick="lookupWord()" style="white-space:nowrap;">查询</button>
+    </div>
+    <div id="lookup-result" style="display:none;margin-top:.85rem;"></div>
+    <div id="lookup-note-wrap" style="display:none;margin-top:.75rem;">
+      <label>备注</label>
+      <textarea id="lookup-note-ta" placeholder="写下你的理解..." style="min-height:62px;font-size:.87rem;"></textarea>
+      <button class="btn btn-ghost" onclick="saveLookupNote()" style="margin-top:4px;font-size:.76rem;padding:.35rem .82rem;">保存</button>
+    </div>
+  </div>
+  <div class="sec">今日数字资产新词</div>
+  <div class="wod">
+    <div class="wod-label">WORD OF THE DAY</div>
+    <div class="wod-word" id="wod-w">—</div>
+    <div class="wod-pho" id="wod-p"></div>
+    <div class="wod-def" id="wod-d"></div>
+    <div class="wod-cn" id="wod-c"></div>
+  </div>
+  <div class="sec">给自己提问题</div>
+  <div id="q-list"></div>
+  <button class="add-q-btn" onclick="addQuestion()">＋ 添加问题</button>
+</div>
+
+<!-- ── DIARY ── -->
+<div class="page" id="page-diary">
+  <div class="sec" style="margin-top:0;">每日反思日记</div>
+  <div class="new-diary">
+    <div class="nd-title">今日反思</div>
+    <div class="diary-meta">
+      <div style="font-size:.75rem;color:var(--ink3);" id="today-date-label"></div>
+      <div style="display:flex;gap:4px;">
+        <button class="mood-opt sel" data-m="😊" onclick="selMood(this)">😊</button>
+        <button class="mood-opt" data-m="😐" onclick="selMood(this)">😐</button>
+        <button class="mood-opt" data-m="😴" onclick="selMood(this)">😴</button>
+        <button class="mood-opt" data-m="🤔" onclick="selMood(this)">🤔</button>
+        <button class="mood-opt" data-m="😤" onclick="selMood(this)">😤</button>
+      </div>
+    </div>
+    <textarea class="diary-ta" id="diary-ta" placeholder="今天学了什么？有什么新发现？&#10;&#10;• 文章主要观点&#10;• 新学到的词汇或概念&#10;• 对市场的观察&#10;• 明天的学习计划..."></textarea>
+    <button class="btn btn-fill" onclick="saveDiaryEntry()" style="width:100%;">保存</button>
+  </div>
+  <div class="sec">历史日记</div>
+  <div class="diary-entries" id="diary-entries"><div style="text-align:center;padding:1.8rem;color:var(--ink3);font-size:.82rem;">今天写第一篇吧</div></div>
+</div>
+
+<!-- ── SETTINGS ── -->
+<div class="page" id="page-settings">
+  <div class="sec" style="margin-top:0;">设置</div>
+  <div class="shiba-card">
+    <svg id="settings-shiba" width="54" height="54" viewBox="0 0 120 120" fill="none">
+      <path d="M28 52 C24 38 20 24 28 14 C33 8 40 12 42 22 C44 30 40 44 36 52Z" stroke="#1A1A1A" stroke-width="2.5" fill="#F5F5F5"/>
+      <path d="M92 52 C96 38 100 24 92 14 C87 8 80 12 78 22 C76 30 80 44 84 52Z" stroke="#1A1A1A" stroke-width="2.5" fill="#F5F5F5"/>
+      <path d="M24 66 C22 50 26 38 34 30 C40 25 50 22 60 22 C70 22 80 25 86 30 C94 38 98 50 96 66 C96 80 88 94 60 101 C32 94 24 80 24 66Z" stroke="#1A1A1A" stroke-width="2.5" fill="white"/>
+      <path d="M38 72 C38 62 46 56 60 56 C74 56 82 62 82 72 C82 84 74 94 60 96 C46 94 38 84 38 72Z" stroke="#1A1A1A" stroke-width="1.5" fill="#F7F5F2"/>
+      <ellipse cx="42" cy="56" rx="7" ry="6.5" stroke="#1A1A1A" stroke-width="1.8" fill="white"/>
+      <ellipse cx="42" cy="57" rx="4.5" ry="4.2" fill="#1A1A1A"/>
+      <circle cx="40.3" cy="55.2" r="1.5" fill="white"/>
+      <ellipse cx="78" cy="56" rx="7" ry="6.5" stroke="#1A1A1A" stroke-width="1.8" fill="white"/>
+      <ellipse cx="78" cy="57" rx="4.5" ry="4.2" fill="#1A1A1A"/>
+      <circle cx="76.3" cy="55.2" r="1.5" fill="white"/>
+      <path d="M53 68 C53 64 55.5 62 60 62 C64.5 62 67 64 67 68 C67 71 64.5 73 60 73 C55.5 73 53 71 53 68Z" fill="#1A1A1A"/>
+      <path id="set-mouth" d="M51 80 Q60 87 69 80" stroke="#1A1A1A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div style="font-weight:600;font-size:.92rem;" id="settings-user-email">—</div>
+      <div style="font-size:.77rem;color:var(--ink3);margin-top:2px;" id="settings-streak-msg">连续学习中</div>
+    </div>
+  </div>
+  <div class="settings-sec">
+    <div class="set-title">OpenAI API Key</div>
+    <div class="set-sub">用于文章分析、总结评估、造句评估和词汇查询。Key 只存在本地浏览器。</div>
+    <div class="api-row">
+      <input type="password" id="settings-api-key" placeholder="sk-proj-...">
+      <button class="btn btn-fill" onclick="saveApiKeyFromSettings()">保存</button>
+    </div>
+    <div class="api-st no" id="settings-api-status">未配置</div>
+    <div class="how-to">
+      <div class="how-t">如何获取 OpenAI API Key</div>
+      <div class="how-step"><div class="sn">1</div><span><a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--ink);">platform.openai.com/api-keys</a></span></div>
+      <div class="how-step"><div class="sn">2</div><span>Create new secret key → 复制</span></div>
+      <div class="how-step"><div class="sn">3</div><span>Billing 充值 $5，每篇分析约 $0.02</span></div>
+    </div>
+  </div>
+  <div class="settings-sec">
+    <div class="set-title">学习统计</div>
+    <div id="settings-stats" style="font-size:.85rem;line-height:2.1;"></div>
+  </div>
+  <div class="settings-sec" style="margin-bottom:0;">
+    <button class="btn btn-ghost" onclick="logout()" style="width:100%;">退出登录</button>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<nav class="bnav">
+  <button class="nv on" onclick="showPage('today',this)"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>今天</button>
+  <button class="nv" onclick="showPage('article',this)"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>文章</button>
+  <button class="nv" onclick="showPage('cards',this)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="8" y1="13" x2="16" y2="13"/></svg>卡片</button>
+  <button class="nv" onclick="showPage('crypto',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 8h4.5a2.5 2.5 0 010 5H9m0 0h5a2.5 2.5 0 010 5H9M9 8V6m0 14v-2"/></svg>数字</button>
+  <button class="nv" onclick="showPage('diary',this)"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h10M4 14h7M4 18h5"/><path d="M20 14l-6 6-3 1 1-3 6-6 2 2z"/></svg>日记</button>
+  <button class="nv" onclick="showPage('settings',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>设置</button>
+</nav>
+</div>
+
+<script>
+// ══ STATE ══
+const SK='shibav6';
+let S={user:null,streak:0,lastStudy:null,apiKey:'',cards:[],questions:[],diary:[],notes:{},lookupNotes:{},wsjCache:null,wsjDate:null,idxDayTrad:0,idxDayCrypto:0};
+function load(){try{const d=localStorage.getItem(SK);if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function save(){try{localStorage.setItem(SK,JSON.stringify(S));}catch(e){}}
+
+// ══ AUTH ══
+function doLogin(){
+  const em=document.getElementById('auth-email').value.trim();
+  const pw=document.getElementById('auth-pw').value;
+  if(!em.includes('@')){toast('请输入有效邮箱');return;}
+  if(!pw||pw.length<4){toast('密码至少4位');return;}
+  if(S.user&&S.user!==em){toast('邮箱不匹配');return;}
+  S.user=em;
+  const today=new Date().toDateString();
+  if(S.lastStudy!==today){const yd=new Date(Date.now()-86400000).toDateString();S.streak=S.lastStudy===yd?(S.streak||0)+1:1;S.lastStudy=today;}
+  save();bootApp();
+}
+function logout(){if(!confirm('确认退出？'))return;document.getElementById('app').style.display='none';document.getElementById('auth-screen').style.display='flex';}
+
+function bootApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-display').textContent=S.user.split('@')[0];
+  document.getElementById('streak-n').textContent=S.streak||1;
+  document.getElementById('settings-user-email').textContent=S.user;
+  document.getElementById('today-date-label').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  if(S.apiKey){document.getElementById('settings-api-key').value='●'.repeat(20);setApiSt(true);}
+  updateGreeting();renderMarkets();renderFX();renderIdxPlan();renderTaskList();renderCrypto();renderDailyWord();renderQuestions();renderDiary();updateCardStats();updateSettingsStats();loadWSJ();
+}
+
+function updateGreeting(){
+  const h=new Date().getHours();const name=S.user.split('@')[0];
+  const g=h<6?[`深夜了，${name}！`,'柴犬陪你夜读']:h<12?[`早上好，${name}！`,'今天也要元气满满']:h<14?['午饭后学一会儿','消化食物的最佳方式是读书']:h<18?['下午好！','继续学习']:h<22?['晚上好！','复习今天学的内容']:['睡前学习模式','今天收获了什么？'];
+  document.getElementById('greet-title').textContent=g[0];
+  document.getElementById('greet-sub').textContent=g[1]+' · '+(S.streak||1)+'天连续🔥';
+  // Update settings shiba mood based on streak
+  const streak=S.streak||0;
+  const mouthEl=document.getElementById('set-mouth');
+  if(mouthEl){
+    if(streak>=7) mouthEl.setAttribute('d','M48 79 Q60 89 72 79'); // big smile
+    else if(streak>=3) mouthEl.setAttribute('d','M51 80 Q60 87 69 80'); // normal smile
+    else if(streak===0) mouthEl.setAttribute('d','M51 83 Q60 78 69 83'); // slight frown
+    else mouthEl.setAttribute('d','M52 81 Q60 86 68 81');
+  }
+  document.getElementById('settings-streak-msg').textContent = streak>=7?`连续${streak}天！柴犬非常开心 🎉`:streak>=3?`连续${streak}天，柴犬开心`:`连续${streak||0}天`;
+}
+
+// ══ INDEX LEARNING PLAN ══
+const TRAD_INDICES=[
+  {name:'CAC 40',label:'法国基准股指',desc:'Cotation Assistée en Continu — 法国 40 家最大上市公司的股价加权指数，是欧元区最重要的股指之一，反映法国经济健康状况。',points:['由 Euronext 运营，涵盖奢侈品、能源、银行等行业','对欧洲央行利率决定极为敏感','路威酩轩 LVMH、道达尔能源 TotalEnergies 是最大成分股'],url:'https://www.euronext.com/en/markets/paris',urlLabel:'Euronext 官网',think:['今天 CAC 40 上涨还是下跌？背后原因是什么行业驱动？','如果 ECB 加息，CAC 40 会如何反应？为什么？','法国经济数据（GDP、通胀）如何影响这个指数？']},
+  {name:'EURONEXT 100',label:'泛欧蓝筹指数',desc:'Euronext 旗下100家最大最具流动性欧洲蓝筹股指数，覆盖法国、荷兰、比利时、葡萄牙、爱尔兰等市场。',points:['真正的泛欧洲视角，不局限于单一国家','与欧元走势高度关联','壳牌 Shell、阿斯麦 ASML、LVMH 均为成分股'],url:'https://live.euronext.com/en/product/indices/QS0011052415-XPAR',urlLabel:'Euronext Live',think:['EURONEXT 100 与 CAC 40 的表现有何差异？原因是什么？','哪些行业在欧洲指数中权重最大？','欧元/美元汇率如何影响欧洲出口企业的股价？']},
+  {name:'S&P 500',label:'美国标普500',desc:'美国500家大型上市公司市值加权指数，是全球最重要的股票基准，管理近 $15 万亿跟踪资金。',points:['科技股权重约 30%，苹果、微软、英伟达主导','美联储货币政策是最大驱动因素','与全球股市高度相关，被视为全球风险情绪晴雨表'],url:'https://finance.yahoo.com/quote/%5EGSPC',urlLabel:'Yahoo Finance',think:['S&P 500 和 CAC 40 今天走势是否一致？差异说明什么？','美联储加息周期中，S&P 500 历史上如何表现？','科技股估值过高时，如何影响整个指数？']},
+  {name:'ECB 利率',label:'欧洲央行基准利率',desc:'欧洲央行设定的三个关键利率：主要再融资利率、存款便利利率、边际贷款利率。这些利率决定欧元区所有贷款和存款的基准成本。',points:['存款便利利率（3.75%）是当前最重要的政策工具','利率决定影响欧元汇率、债券收益率、房贷成本','每隔6周的政策会议是欧洲金融市场最重要事件'],url:'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html',urlLabel:'ECB 官网',think:['ECB 为什么要加息/降息？背后的经济逻辑是什么？','利率上升对欧洲国债价格有何影响？','ECB 和 Fed 利率差异如何影响欧元/美元汇率？']},
+  {name:'ESG 绿色债券',label:'气候债券指数',desc:'追踪符合绿色债券标准的固定收益证券，这些债券的融资专用于气候和环境项目，是全球可持续金融的重要工具。',points:['欧洲是全球最大绿色债券发行市场','与传统债券相比，绿色溢价（Greenium）通常为负收益率','ECB 将绿色债券纳入 QE 购买范围，影响市场定价'],url:'https://www.climatebonds.net/market/data/',urlLabel:'Climate Bonds Initiative',think:['绿色债券的收益率通常比普通债券高还是低？为什么？','哪些国家和机构是最大的绿色债券发行方？','ESG 投资潮流对传统能源公司的融资有何影响？']},
+];
+
+const CRYPTO_INDICES=[
+  {name:'Bitcoin (BTC)',label:'数字黄金 · 市值第一',desc:'比特币是第一个去中心化加密货币，总供应量 2100 万枚，通过"挖矿"机制每4年减半。被机构投资者视为"数字黄金"和通胀对冲工具。',points:['2024年ETF获批后机构持有量激增','与标普500的相关性在风险规避时期显著上升','每次减半（Halving）后历史上均出现价格大涨'],url:'https://coinmarketcap.com/currencies/bitcoin/',urlLabel:'CoinMarketCap',think:['BTC 为什么被称为"数字黄金"？与实体黄金有何区别？','机构买入BTC对市场波动性有何影响？','比特币减半对矿工经济模型有什么影响？']},
+  {name:'Ethereum (ETH)',label:'智能合约平台',desc:'以太坊是最大的可编程区块链，支持智能合约和去中心化应用（DApp）。2022年转向权益证明（PoS）后能耗降低99.9%，并通过EIP-1559实现部分ETH销毁。',points:['DeFi（去中心化金融）和NFT主要运行于以太坊','质押（Staking）年化收益约3-5%','Layer 2扩容（Arbitrum、Optimism）降低交易费'],url:'https://coinmarketcap.com/currencies/ethereum/',urlLabel:'CoinMarketCap',think:['以太坊与比特币的根本区别是什么？','什么是 Gas Fee？它如何影响以太坊的使用场景？','Layer 2 解决了什么问题？对 ETH 价值有何影响？']},
+  {name:'Total Market Cap',label:'加密总市值',desc:'全球所有加密货币的总市值，是衡量整个数字资产行业规模和风险情绪的最重要宏观指标。',points:['BTC和ETH合计占总市值约60%（比特币主导率）','总市值与风险偏好、美元流动性高度相关','牛市高点约$3万亿，熊市低点约$0.8万亿'],url:'https://coinmarketcap.com/',urlLabel:'CoinMarketCap',think:['比特币主导率（BTC Dominance）上升意味着什么？','加密总市值与纳斯达克指数的相关性如何？','美联储缩表（QT）如何影响加密市场总市值？']},
+  {name:'DeFi TVL',label:'去中心化金融锁仓量',desc:'Total Value Locked — 锁定在各 DeFi 协议中的资产总价值，是衡量去中心化金融生态系统规模和用户活跃度的核心指标。',points:['峰值约$1800亿，当前约$900亿','Aave、Uniswap、MakerDAO 是最大协议','TVL增长通常领先加密价格反弹'],url:'https://defillama.com/',urlLabel:'DeFi Llama',think:['TVL 下降是否意味着风险规避情绪上升？','DeFi 利率如何与传统金融利率形成竞争关系？','流动性池（Liquidity Pool）和银行存款有何本质区别？']},
+  {name:'Crypto Fear & Greed',label:'恐惧与贪婪指数',desc:'0-100的情绪指标，综合波动率、交易量、社交媒体情绪、主导率等因素，衡量市场整体情绪。极度恐惧通常是买入信号，极度贪婪是警示。',points:['0-25：极度恐惧（潜在买入机会）','75-100：极度贪婪（潜在顶部风险）','与VIX恐惧指数类比，但加密市场波动更剧烈'],url:'https://alternative.me/crypto/fear-and-greed-index/',urlLabel:'Fear & Greed Index',think:['如果恐惧贪婪指数达到90，你会做什么决策？','市场情绪如何成为"自我实现预言"？','与传统市场的VIX指数相比，加密恐惧贪婪指数有何不同？']},
+];
+
+let currentIdxTab=0;
+let currentTradIdx=0;
+let currentCryptoIdx=0;
+
+function renderIdxPlan(){
+  const today=new Date().toDateString();
+  // Advance day if new day
+  if(S.lastIdxDate!==today){S.lastIdxDate=today;save();}
+  currentTradIdx=((new Date().getDate()-1))%TRAD_INDICES.length;
+  currentCryptoIdx=((new Date().getDate()-1))%CRYPTO_INDICES.length;
+  renderIdxBody();
+}
+
+function renderIdxBody(){
+  const list=currentIdxTab===0?TRAD_INDICES:CRYPTO_INDICES;
+  const idx=currentIdxTab===0?currentTradIdx:currentCryptoIdx;
+  const item=list[idx];
+  const total=list.length;
+
+  document.getElementById('idx-body').innerHTML=`
+    <div class="idx-name">${item.name}</div>
+    <div class="idx-label">${item.label} · 第 ${idx+1}/${total} 天</div>
+    <div class="idx-desc">${item.desc}</div>
+    <div class="idx-why-title">为什么要关注</div>
+    ${item.points.map(p=>`<div class="idx-why-item"><div class="idx-why-dot"></div><span>${p}</span></div>`).join('')}
+    <div class="idx-why-title" style="margin-top:.85rem;">引导思考</div>
+    ${item.think.map(q=>`<div class="idx-why-item" style="color:var(--ink3);"><div class="idx-why-dot" style="background:var(--ink4);"></div><span>${q}</span></div>`).join('')}
+    <div class="idx-ref">
+      <a href="${item.url}" target="_blank" rel="noopener">查看实时数据 →</a>
+    </div>
+    <div class="idx-nav">
+      <button class="idx-nav-btn" onclick="prevIdx()">← 上一个</button>
+      <button class="idx-nav-btn" onclick="nextIdx()">下一个 →</button>
+    </div>`;
+
+  // Progress dots
+  const dots=list.map((_,i)=>`<div class="idx-dot${i===idx?' done':''}"></div>`).join('');
+  document.getElementById('idx-progress').innerHTML=dots;
+}
+
+function switchIdxTab(tab,btn){
+  currentIdxTab=tab;
+  document.querySelectorAll('.idx-tab').forEach((b,i)=>b.classList.toggle('on',i===tab));
+  renderIdxBody();
+}
+function nextIdx(){
+  const list=currentIdxTab===0?TRAD_INDICES:CRYPTO_INDICES;
+  if(currentIdxTab===0)currentTradIdx=(currentTradIdx+1)%list.length;
+  else currentCryptoIdx=(currentCryptoIdx+1)%list.length;
+  renderIdxBody();
+}
+function prevIdx(){
+  const list=currentIdxTab===0?TRAD_INDICES:CRYPTO_INDICES;
+  if(currentIdxTab===0)currentTradIdx=(currentTradIdx-1+list.length)%list.length;
+  else currentCryptoIdx=(currentCryptoIdx-1+list.length)%list.length;
+  renderIdxBody();
+}
+
+// ══ WSJ ══
+const WSJ_FB=[
+  {n:1,cat:'Economy',t:'Fed Officials Signal Patience on Rate Cuts Amid Sticky Inflation',why:'货币政策核心词汇，与ECB对比学习'},
+  {n:2,cat:'Markets',t:'Treasury Yields Rise as Bond Selloff Deepens',why:'债券市场必备，关联ESG绿色债券'},
+  {n:3,cat:'Europe',t:'ECB Holds Steady, Warns Against Premature Easing',why:'直接关联ECB利率监控指标'},
+  {n:4,cat:'Digital Assets',t:'Institutional Bitcoin Demand Hits Record Amid Macro Shifts',why:'连接数字资产学习'},
+  {n:5,cat:'FX / China',t:'Yuan Under Pressure as Dollar Strengthens on Jobs Data',why:'人民币/美元汇率关联'},
+];
+async function loadWSJ(){
+  const today=new Date().toDateString();
+  if(S.wsjCache&&S.wsjDate===today){renderWSJList(S.wsjCache);return;}
+  if(!S.apiKey){renderWSJList(WSJ_FB);return;}
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:500,messages:[{role:'user',content:`Suggest 5 WSJ reading topics for ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})} for a France-based learner tracking: CAC40, Euronext, ECB rates, CNY/USD, crypto. Return ONLY JSON array: [{"n":1,"cat":"section","t":"headline topic","why":"value in Chinese max 25 chars"}]`}]})});
+    const data=await res.json();if(data.error)throw new Error();
+    const p=JSON.parse(data.choices[0].message.content.replace(/```json\n?/g,'').replace(/```/g,'').trim());
+    S.wsjCache=p;S.wsjDate=today;save();renderWSJList(p);
+  }catch(e){renderWSJList(WSJ_FB);}
+}
+function renderWSJList(items){
+  document.getElementById('wsj-list').innerHTML=(items||WSJ_FB).map(i=>`<div class="wsj-item"><div class="wsj-n">${i.n}</div><div><div class="wsj-cat">${i.cat}</div><div class="wsj-t">${i.t}</div><div class="wsj-why">${i.why}</div></div></div>`).join('');
+}
+async function refreshWSJ(){S.wsjCache=null;S.wsjDate=null;save();document.getElementById('wsj-list').innerHTML='<div style="font-size:.78rem;color:var(--ink3);padding:.4rem 0;">生成中...</div>';await loadWSJ();toast('已更新 ✓');}
+
+// ══ MARKET DATA ══
+const MKTS=[
+  {n:'S&P 500',v:'5,240',note:'参考价',url:'https://finance.yahoo.com/quote/%5EGSPC'},
+  {n:'NASDAQ',v:'18,420',note:'参考价',url:'https://finance.yahoo.com/quote/%5EIXIC'},
+  {n:'CAC 40',v:'8,027',note:'参考价',url:'https://www.euronext.com/en/markets/paris'},
+  {n:'EURONEXT 100',v:'1,285',note:'参考价',url:'https://live.euronext.com/en/product/indices/QS0011052415-XPAR'},
+  {n:'ECB Deposit',v:'3.75%',note:'存款利率',url:'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html'},
+  {n:'ECB Main',v:'4.50%',note:'主要再融资',url:'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html'},
+  {n:'Green Bond',v:'102.4',note:'参考指数',url:'https://www.climatebonds.net/market/data/'},
+  {n:'BTC/USD',v:'~67,200',note:'参考价',url:'https://coinmarketcap.com/currencies/bitcoin/'},
+];
+function renderMarkets(){
+  document.getElementById('mkt-grid').innerHTML=MKTS.map(m=>`
+    <a class="mkt-card" href="${m.url}" target="_blank" rel="noopener">
+      <svg class="mkt-ext" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <div class="mkt-name">${m.n}</div><div class="mkt-val">${m.v}</div><div class="mkt-note">${m.note}</div>
+    </a>`).join('');
+}
+function renderFX(){
+  const pairs=[
+    {p:'CNY/USD',v:'7.2423',note:'参考汇率',url:'https://www.xe.com/currencyconverter/convert/?Amount=1&From=CNY&To=USD'},
+    {p:'CNY/EUR',v:'6.6817',note:'参考汇率',url:'https://www.xe.com/currencyconverter/convert/?Amount=1&From=CNY&To=EUR'},
+    {p:'EUR/USD',v:'1.0835',note:'参考汇率',url:'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html'},
+  ];
+  document.getElementById('fx-row').innerHTML=pairs.map(p=>`
+    <a class="fx-card" href="${p.url}" target="_blank" rel="noopener">
+      <div class="fx-pair">${p.p}</div><div class="fx-val">${p.v}</div><div class="fx-note">${p.note}</div>
+    </a>`).join('');
+}
+function renderTaskList(){
+  const due=S.cards.filter(isDue).length;
+  const tasks=[
+    {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',n:'阅读分析文章',s:'粘贴 WSJ 文章进行 AI 分析',b:'b-d',l:'今天',a:"showPage('article')"},
+    {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="6" width="20" height="14" rx="2"/><line x1="8" y1="13" x2="16" y2="13"/></svg>',n:`复习卡片 (${due}张)`,s:'艾宾浩斯遗忘曲线',b:due>0?'b-d':'b-g',l:due>0?'今天':'已完成',a:"showPage('cards')"},
+    {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 8h4.5a2.5 2.5 0 010 5H9m0 0h5a2.5 2.5 0 010 5H9"/></svg>',n:'数字资产词典',s:'今日术语学习',b:'b-d',l:'今天',a:"showPage('crypto')"},
+    {svg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6h16M4 10h10M4 14h7M4 18h5"/><path d="M20 14l-6 6-3 1 1-3 6-6 2 2z"/></svg>',n:'每日反思',s:'记录今天的学习和思考',b:'b-d',l:'今天',a:"showPage('diary')"},
+  ];
+  document.getElementById('task-list').innerHTML=tasks.map(t=>`
+    <div class="task-item" onclick="${t.a}">
+      <div class="task-ic">${t.svg}</div>
+      <div class="task-info"><div class="task-name">${t.n}</div><div class="task-sub">${t.s}</div></div>
+      <div class="badge ${t.b}">${t.l}</div>
+    </div>`).join('');
+}
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nv').forEach(b=>b.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  if(btn)btn.classList.add('on');
+  if(name==='cards')updateCardStats();
+  if(name==='settings')updateSettingsStats();
+  if(name==='diary')renderDiary();
+}
+
+// ══ API ══
+function setApiSt(ok){const el=document.getElementById('settings-api-status');if(el){el.className='api-st '+(ok?'ok':'no');el.textContent=ok?'✓ 已配置':'未配置';}}
+function saveApiKeyFromSettings(){
+  const v=document.getElementById('settings-api-key').value.trim();
+  if(!v||v.startsWith('●')){toast('请输入 API Key');return;}
+  if(!v.startsWith('sk-')){toast('格式错误');return;}
+  S.apiKey=v;save();document.getElementById('settings-api-key').value='●'.repeat(20);setApiSt(true);toast('已保存 ✓');
+  S.wsjCache=null;S.wsjDate=null;loadWSJ();
+}
+function onArticleInput(){document.getElementById('analyze-btn').disabled=document.getElementById('article-ta').value.trim().length<80;}
+
+// ══ ARTICLE ANALYSIS ══
+let progTimer;let analysisData={};
+function startProg(){const f=document.getElementById('prog-fill');let w=0;f.style.width='0%';progTimer=setInterval(()=>{w=Math.min(w+(Math.random()*4+1),88);f.style.width=w+'%';},600);}
+function stopProg(){clearInterval(progTimer);document.getElementById('prog-fill').style.width='100%';}
+
+async function analyzeArticle(){
+  if(!S.apiKey){toast('请先在设置中配置 API Key');showPage('settings');return;}
+  const art=document.getElementById('article-ta').value.trim();if(!art)return;
+  showOverlay(true,'正在阅读文章...');startProg();
+  document.getElementById('analyze-btn').disabled=true;
+
+  const prompt=`Analyze this WSJ economics article. Return ONLY valid JSON:
+{"vocab":[{"word":"","phonetic":"","pos":"","cn":"","en":"","example":"","level":"C1 descriptor"}],
+"econTerms":[{"term":"","cn":"","def":"English definition 2 sentences","context":"how it appears in this specific article","impact":"how it affects markets/economy","think":["question 1","question 2"]}],
+"paragraphs":[{"en":"paragraph text","cn":"中文翻译","summary":"一句中文段落大意"}],
+"summaryEN":"2-paragraph English summary","summaryCN":"200字中文总结",
+"econAnalysis":"200字中文经济局势分析",
+"quizSentences":[{"sentence":"full sentence with ONE word replaced by blank","answer":"the replaced word","hint":"Chinese hint"}],
+"grammarPatterns":[{"pattern":"pattern name","example":"from article","cn":"中文解释","tip":"usage tip","keyWords":["word1","word2"]}]}
+Rules: vocab 8-10 words, genuinely C1-C2 advanced only (NO: significant, result, investment, important). econTerms 5-7. paragraphs ALL of them. 6 quiz items. 5 grammar patterns.
+Article: ${art.slice(0,3800)}`;
+
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:4500,temperature:0.2,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();if(data.error)throw new Error(data.error.message);
+    const txt=data.choices[0].message.content.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    analysisData=JSON.parse(txt);
+    stopProg();
+    renderAnalysis(analysisData);addToCards(analysisData.vocab||[]);save();
+    document.getElementById('analysis-out').style.display='block';
+    toast('分析完成 ✓');renderTaskList();
+  }catch(e){stopProg();toast('失败：'+e.message.slice(0,60));console.error(e);}
+  showOverlay(false);document.getElementById('analyze-btn').disabled=false;
+}
+
+function esc(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ').slice(0,120);}
+
+function renderAnalysis(d){
+  // VOCAB
+  document.getElementById('vocab-grid').innerHTML=(d.vocab||[]).map(v=>`
+    <div class="vc">
+      <div class="vc-word">${v.word}</div>
+      <div class="vc-pho">${v.phonetic||''}</div>
+      <span class="vc-pos">${v.pos||''} · ${v.level||'advanced'}</span>
+      <div class="vc-cn">${v.cn}</div>
+      <div class="vc-en">${v.en}</div>
+      ${v.example?`<div class="vc-ex">"${v.example}"</div>`:''}
+      <button class="save-chip" onclick="saveChip('${esc(v.word)}','${esc(v.cn)}','${esc(v.en)}','${esc(v.example||'')}')">＋ 加入卡片</button>
+    </div>`).join('');
+
+  // ECON TERMS with context+analysis
+  document.getElementById('econ-terms').innerHTML=(d.econTerms||[]).map((t,i)=>`
+    <div class="econ-term-card">
+      <div class="etc-term">${t.term}</div>
+      <div class="etc-cn">${t.cn}</div>
+      <div class="etc-section">
+        <div class="etc-label">定义</div>
+        <div class="etc-text">${t.def}</div>
+      </div>
+      <div class="etc-section">
+        <div class="etc-label">在本文中的意义</div>
+        <div class="etc-context">${t.context||'—'}</div>
+      </div>
+      <div class="etc-section">
+        <div class="etc-label">市场影响与局势判断</div>
+        <div class="etc-text">${t.impact||'—'}</div>
+      </div>
+      ${(t.think&&t.think.length)?`<div class="etc-section"><div class="etc-label">引导思考</div><div class="etc-think">${t.think.map(q=>`<div class="etc-think-q">${q}</div>`).join('')}</div></div>`:''}
+      <button class="save-chip" style="margin-top:.5rem;" onclick="saveChip('${esc(t.term)}','${esc(t.cn)}','${esc(t.def)}','')">＋ 加入卡片</button>
+    </div>`).join('');
+
+  // BILINGUAL - newspaper mode
+  document.getElementById('article-date-label').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).toUpperCase();
+  document.getElementById('bilingual-out').innerHTML=(d.paragraphs||[]).map((p,i)=>`
+    <div class="bi-para">
+      <div class="bi-en-text">${p.en}</div>
+      <div class="bi-cn-hidden" id="bi-cn-${i}">${p.cn}</div>
+      <button class="bi-toggle" onclick="toggleBiCN(${i},this)">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        显示中文译文
+      </button>
+      ${p.summary?`<div class="bi-sum-toggle" onclick="toggleBiSum(${i},this)">▸ 段落大意</div><div class="bi-sum-hidden bi-sum" id="bi-sum-${i}">📝 ${p.summary}</div>`:''}
+    </div>`).join('');
+
+  // SUMMARY - store AI versions
+  document.getElementById('ai-sum-en-text').textContent=d.summaryEN||'';
+  document.getElementById('ai-sum-cn-text').textContent=d.summaryCN||'';
+  document.getElementById('ai-sum-area').classList.remove('visible');
+  document.getElementById('ai-sum-toggle-btn').textContent='查看 AI 参考总结';
+  document.getElementById('summary-eval').style.display='none';
+
+  // QUIZ
+  document.getElementById('quiz-out').innerHTML=(d.quizSentences||[]).map((q,i)=>{
+    const ans=q.answer||'';
+    const s=(q.sentence||'').replace(new RegExp(ans.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'),'<span class="quiz-blank">______</span>');
+    return `<div class="quiz-item"><div class="quiz-sent">${s}</div><div style="font-size:.78rem;color:var(--ink3);margin-bottom:.55rem;">提示：${q.hint||''}</div><input class="qi" id="qi${i}" placeholder="填写答案..." data-ans="${ans.toLowerCase()}"><button class="chk-btn" onclick="checkQ(${i})">核对</button></div>`;
+  }).join('');
+
+  // GRAMMAR with AI eval
+  document.getElementById('grammar-out').innerHTML=(d.grammarPatterns||[]).map((g,i)=>`
+    <div class="gram-item">
+      <div class="gram-pattern-label">句式 ${i+1} · ${g.pattern||''}</div>
+      <div class="gram-ex">"${g.example||''}"</div>
+      <div class="gram-cn">${g.cn||''} · ${g.tip||''}</div>
+      ${g.keyWords&&g.keyWords.length?`<div style="font-size:.75rem;color:var(--ink3);margin-bottom:.6rem;">参考词汇：${g.keyWords.map(w=>`<span style="background:var(--warm);padding:1px 7px;border-radius:6px;margin-right:3px;">${w}</span>`).join('')}</div>`:''}
+      <input class="gram-input" placeholder="用这个句式造句..." id="gram${i}">
+      <div class="gram-btns">
+        <button class="save-chip" onclick="evalGrammar(${i},'${esc(g.pattern||'')}','${esc(g.example||'')}')">AI 评估</button>
+        <button class="save-chip" onclick="saveGrammarSentence(${i})" style="margin-left:4px;">保存到卡片</button>
+      </div>
+      <div class="gram-eval-box" id="gram-eval-${i}"><div class="gram-eval-text" id="gram-eval-text-${i}"></div></div>
+    </div>`).join('');
+
+  const nk='note_'+new Date().toDateString();
+  document.getElementById('note-ta').value=S.notes[nk]||'';
+}
+
+function toggleBiCN(i,btn){
+  const el=document.getElementById('bi-cn-'+i);
+  const show=!el.classList.contains('visible');
+  el.classList.toggle('visible',show);
+  btn.querySelector('svg').style.transform=show?'rotate(90deg)':'';
+  btn.lastChild.textContent=show?' 隐藏中文译文':' 显示中文译文';
+}
+function toggleBiSum(i,btn){
+  const el=document.getElementById('bi-sum-'+i);
+  el.classList.toggle('visible');
+  btn.textContent=el.classList.contains('visible')?'▾ 段落大意':'▸ 段落大意';
+}
+function toggleAISummary(){
+  const el=document.getElementById('ai-sum-area');
+  const show=!el.classList.contains('visible');
+  el.classList.toggle('visible',show);
+  document.getElementById('ai-sum-toggle-btn').textContent=show?'隐藏 AI 参考总结':'查看 AI 参考总结';
+}
+
+async function evalMySummary(){
+  if(!S.apiKey){toast('请先配置 API Key');return;}
+  const en=document.getElementById('my-summary-en').value.trim();
+  const cn=document.getElementById('my-summary-cn').value.trim();
+  if(!en&&!cn){toast('请先写下你的总结');return;}
+  showOverlay(true,'AI 正在评估你的总结...');
+  try{
+    const aiSum=analysisData.summaryCN||'';
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:500,messages:[{role:'user',content:`Evaluate this learner's article summary. Be constructive and specific. Reply in Chinese.\n\nLearner's English summary: "${en}"\nLearner's Chinese summary: "${cn}"\nAI reference: "${aiSum}"\n\nEvaluate: 1) What they got right 2) What key points are missing 3) Language quality (1-2 suggestions) 4) Overall score /10`}]})});
+    const data=await res.json();if(data.error)throw new Error();
+    const evalText=data.choices[0].message.content;
+    document.getElementById('summary-eval').style.display='block';
+    document.getElementById('summary-eval-text').textContent=evalText;
+    toast('评估完成 ✓');
+  }catch(e){toast('评估失败');}
+  showOverlay(false);
+}
+
+async function evalGrammar(idx,pattern,example){
+  if(!S.apiKey){toast('请先配置 API Key');return;}
+  const sentence=document.getElementById('gram'+idx)?.value.trim();
+  if(!sentence){toast('请先写下你的句子');return;}
+  showOverlay(true,'AI 正在评估你的造句...');
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:350,messages:[{role:'user',content:`Evaluate this sentence written by an economics English learner. Reply in Chinese.\n\nPattern: "${pattern}"\nExample from article: "${example}"\nLearner's sentence: "${sentence}"\n\nEvaluate: grammar correctness, vocabulary appropriateness, naturalness. Give a corrected version if needed. Score /10.`}]})});
+    const data=await res.json();if(data.error)throw new Error();
+    const el=document.getElementById('gram-eval-'+idx);
+    document.getElementById('gram-eval-text-'+idx).textContent=data.choices[0].message.content;
+    el.classList.add('visible');
+    toast('评估完成 ✓');
+  }catch(e){toast('评估失败');}
+  showOverlay(false);
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.remove('on'));
+  if(btn)btn.classList.add('on');document.getElementById('tc-'+name).classList.add('on');
+}
+function checkQ(i){const el=document.getElementById('qi'+i);const ans=el.dataset.ans;const u=el.value.trim().toLowerCase();if(u&&(u===ans||(ans.includes(u)&&u.length>3))){el.classList.add('ok');el.classList.remove('no');toast('正确 ✓');}else{el.classList.add('no');el.classList.remove('ok');toast('答案：'+ans);}}
+function checkAll(){let c=0,t=0;document.querySelectorAll('.qi').forEach(el=>{t++;const ans=el.dataset.ans,u=el.value.trim().toLowerCase();if(u&&(u===ans||(ans.includes(u)&&u.length>3))){el.classList.add('ok');el.classList.remove('no');c++;}else if(u){el.classList.add('no');el.classList.remove('ok');}});toast(`得分 ${c}/${t}`);}
+let noteTmr;
+function autoSaveNote(){clearTimeout(noteTmr);noteTmr=setTimeout(()=>{const k='note_'+new Date().toDateString();S.notes[k]=document.getElementById('note-ta').value;save();document.getElementById('note-status').textContent='已保存 ✓';setTimeout(()=>document.getElementById('note-status').textContent='自动保存',2000);},800);}
+
+// ══ FLASHCARDS ══
+function addToCards(vocab){(vocab||[]).forEach(v=>{if(!S.cards.find(c=>c.word===v.word))S.cards.push({word:v.word,meaning:v.cn,def:v.en,example:v.example||'',nextReview:Date.now(),interval:1,ef:2.5,reps:0});});updateCardStats();save();}
+function saveChip(w,cn,en,ex){if(S.cards.find(c=>c.word===w)){toast(`"${w}" 已在卡片库`);return;}S.cards.push({word:w,meaning:cn,def:en,example:ex,nextReview:Date.now(),interval:1,ef:2.5,reps:0});save();updateCardStats();toast(`"${w}" 加入卡片 ✓`);}
+function saveGrammarSentence(i){const v=document.getElementById('gram'+i)?.value.trim();if(!v){toast('请先造句');return;}S.cards.push({word:v.slice(0,32)+'…',meaning:'造句练习',def:v,example:'',nextReview:Date.now(),interval:1,ef:2.5,reps:0});save();updateCardStats();toast('已保存 ✓');}
+function isDue(c){return c.nextReview<=Date.now();}
+function updateCardStats(){
+  const due=S.cards.filter(isDue).length,master=S.cards.filter(c=>c.interval>=21).length;
+  ['s-due','s-total','s-master'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[due,S.cards.length,master][i];});
+  const nc=document.getElementById('no-cards'),cr=document.getElementById('card-review');
+  if(!S.cards.length){if(nc)nc.style.display='block';if(cr)cr.style.display='none';return;}
+  const dueCards=S.cards.filter(isDue);
+  if(!dueCards.length){if(nc){nc.innerHTML='今日复习全部完成！';nc.style.display='block';}if(cr)cr.style.display='none';}
+  else{if(nc)nc.style.display='none';if(cr)cr.style.display='block';showCard(dueCards[0],dueCards,0);}
+}
+let cIdx=0;
+function showCard(card,list,idx){cIdx=idx;window._cL=list;window._cC=card;document.getElementById('card-prog').textContent=`${idx+1}/${list.length}`;document.getElementById('fc-front-w').textContent=card.word;document.getElementById('fc-back-m').textContent=card.meaning;document.getElementById('fc-back-e').textContent=card.example||card.def;document.getElementById('fc').classList.remove('flipped');document.getElementById('rate-row').style.display='none';}
+function flipCard(){const fc=document.getElementById('fc');fc.classList.toggle('flipped');if(fc.classList.contains('flipped'))document.getElementById('rate-row').style.display='flex';}
+function rateCard(q){const c=window._cC;if(!c)return;if(q>=3){c.reps=(c.reps||0)+1;c.interval=c.reps===1?1:c.reps===2?6:Math.round(c.interval*c.ef);}else{c.reps=0;c.interval=1;}c.ef=Math.max(1.3,(c.ef||2.5)+.1-(5-q)*(.08+(5-q)*.02));c.nextReview=Date.now()+c.interval*86400000;save();const rem=S.cards.filter(isDue);const ni=cIdx+1;if(ni>=rem.length){const nc=document.getElementById('no-cards');if(nc){nc.innerHTML='今日复习完成！';nc.style.display='block';}document.getElementById('card-review').style.display='none';toast('今日全部完成 ✓');}else showCard(rem[ni],rem,ni);updateCardStats();}
+
+// ══ CRYPTO ══
+const CRYPTOS=[
+  {s:'BTC',n:'Bitcoin',v:'~67,200',url:'https://coinmarketcap.com/currencies/bitcoin/'},
+  {s:'ETH',n:'Ethereum',v:'~3,520',url:'https://coinmarketcap.com/currencies/ethereum/'},
+  {s:'SOL',n:'Solana',v:'~185',url:'https://coinmarketcap.com/currencies/solana/'},
+  {s:'BNB',n:'BNB',v:'~582',url:'https://coinmarketcap.com/currencies/bnb/'},
+  {s:'XRP',n:'XRP',v:'~0.62',url:'https://coinmarketcap.com/currencies/xrp/'},
+  {s:'AVAX',n:'Avalanche',v:'~43',url:'https://coinmarketcap.com/currencies/avalanche/'},
+];
+function renderCrypto(){document.getElementById('crypto-grid').innerHTML=CRYPTOS.map(c=>`<a class="crypto-card" href="${c.url}" target="_blank" rel="noopener"><div class="cr-sym">${c.s}</div><div class="cr-full">${c.n}</div><div class="cr-price">$${c.v}</div><div class="cr-note">点击查看实时价格</div></a>`).join('');}
+
+async function lookupWord(){
+  if(!S.apiKey){toast('请先在设置中配置 API Key');return;}
+  const term=document.getElementById('lookup-input').value.trim();if(!term)return;
+  showOverlay(true,`查询 "${term}"...`);
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:'gpt-4o-mini',max_tokens:450,messages:[{role:'user',content:`Define precisely: "${term}". Return ONLY JSON:\n{"word":"","phonetic":"","partOfSpeech":"","definition":"2-3 precise English sentences","chinese":"中文释义2-3句","example":"natural example sentence","related":["term1","term2"],"category":"DeFi/Crypto/Macro/TradFi"}`}]})});
+    const data=await res.json();if(data.error)throw new Error(data.error.message);
+    const p=JSON.parse(data.choices[0].message.content.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim());
+    const el=document.getElementById('lookup-result');el.style.display='block';
+    el.innerHTML=`<div style="border:1px solid var(--line2);border-radius:10px;padding:1rem;background:var(--paper2);">
+      <div class="lr-word">${p.word}</div>
+      <div class="lr-pho">${p.phonetic||''} · ${p.partOfSpeech||''} · <span style="font-size:.65rem;font-weight:600;text-transform:uppercase;color:var(--ink3);">${p.category||''}</span></div>
+      <div class="lr-def">${p.definition}</div>
+      <div class="lr-cn">${p.chinese}</div>
+      ${p.example?`<div class="lr-ex">"${p.example}"</div>`:''}
+      ${p.related?.length?`<div style="margin-top:.6rem;font-size:.73rem;color:var(--ink3);">相关：${p.related.map(r=>`<span style="background:var(--warm);padding:2px 6px;border-radius:6px;margin-right:3px;">${r}</span>`).join('')}</div>`:''}
+      <button class="save-chip" style="margin-top:.65rem;" onclick="saveChip('${esc(p.word)}','${esc(p.chinese)}','${esc(p.definition)}','${esc(p.example||'')}')">＋ 加入卡片</button>
+    </div>`;
+    document.getElementById('lookup-note-wrap').style.display='block';window._lastLookup=p.word;
+    const sv=S.lookupNotes[p.word];if(sv)document.getElementById('lookup-note-ta').value=sv;
+    toast(`"${term}" 查询完成`);
+  }catch(e){toast('查询失败：'+e.message.slice(0,50));}
+  showOverlay(false);
+}
+function saveLookupNote(){const k=window._lastLookup;const v=document.getElementById('lookup-note-ta').value.trim();if(!k||!v)return;S.lookupNotes[k]=v;save();toast('已保存');}
+
+const WODS=[
+  {w:'Basis Trade',p:'/ˈbeɪsɪs treɪd/',d:'Arbitrage exploiting price spread between spot assets and futures contracts; popular in Treasury and crypto markets.',c:'基差交易：利用现货与期货价差套利，常见于美债和加密市场。'},
+  {w:'Carry Trade',p:'/ˈkæri treɪd/',d:"Borrowing in low-rate currency to invest in high-yield assets, profiting from the interest rate differential.",c:'套息交易：借入低息货币投资高收益资产，赚取利差。'},
+  {w:'Rehypothecation',p:'/ˌriːhaɪˌpɒθɪˈkeɪʃən/',d:"Reuse of client-posted collateral by broker/bank as their own collateral for borrowing.",c:'再抵押：经纪商将客户抵押品再次用于自身借贷的做法。'},
+  {w:'Tokenomics',p:'/ˌtəʊkəˈnɒmɪks/',d:"Economic model governing token supply, distribution, and incentive design.",c:'代币经济学：管理代币供应、分配和激励机制的经济模型。'},
+  {w:'MEV',p:'/ˌem iː ˈviː/',d:'Maximal Extractable Value: profit from transaction reordering within blockchain blocks.',c:'最大可提取价值：通过调整区块内交易顺序获取的额外利润。'},
+  {w:'Yield Curve Control',p:'/jiːld kɜːv kənˈtrəʊl/',d:'CB policy capping bond yields at specific maturities by buying unlimited quantities.',c:'收益率曲线控制：央行通过无限购债将特定期限利率锚定在目标区间。'},
+  {w:'Quantitative Tightening',p:'/ˌkwɒntɪˈteɪtɪv ˈtaɪtnɪŋ/',d:"CB balance sheet reduction by letting bonds mature unreinvested or through outright sales.",c:'量化紧缩（QT）：央行缩减资产负债表的政策。'},
+];
+function renderDailyWord(){const w=WODS[new Date().getDate()%WODS.length];document.getElementById('wod-w').textContent=w.w;document.getElementById('wod-p').textContent=w.p;document.getElementById('wod-d').textContent=w.d;document.getElementById('wod-c').textContent=w.c;}
+
+const DEF_QS=['今天读的文章中，最重要的经济信号是什么？对欧洲市场和数字资产有何影响？','今天学到的3个新词，各造一个英文句子。','如果你是ECB决策者，这篇文章会如何影响你的利率决定？'];
+function renderQuestions(){
+  if(!S.questions.length)S.questions=DEF_QS.map(t=>({t,a:''}));
+  document.getElementById('q-list').innerHTML=S.questions.map((q,i)=>`<div class="q-card"><div class="q-text">${q.t}</div><button class="q-del" onclick="delQ(${i})">✕</button><textarea class="ans-area" placeholder="写下你的回答..." oninput="updateQ(${i},this.value)">${q.a||''}</textarea></div>`).join('');
+}
+function addQuestion(){const t=prompt('输入你的问题：');if(!t)return;S.questions.push({t,a:''});save();renderQuestions();}
+function delQ(i){S.questions.splice(i,1);save();renderQuestions();}
+function updateQ(i,v){if(S.questions[i]){S.questions[i].a=v;clearTimeout(window._qt);window._qt=setTimeout(save,800);}}
+
+let selMoodV='😊';
+function selMood(btn){document.querySelectorAll('.mood-opt').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selMoodV=btn.dataset.m;}
+function saveDiaryEntry(){const txt=document.getElementById('diary-ta').value.trim();if(!txt){toast('请先写点什么');return;}S.diary.unshift({date:new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'short'}),ts:Date.now(),mood:selMoodV,text:txt});if(S.diary.length>365)S.diary=S.diary.slice(0,365);save();document.getElementById('diary-ta').value='';toast('日记已保存 ✓');renderDiary();}
+function renderDiary(){const el=document.getElementById('diary-entries');if(!S.diary.length){el.innerHTML='<div style="text-align:center;padding:1.8rem;color:var(--ink3);font-size:.82rem;">今天写第一篇吧</div>';return;}el.innerHTML=S.diary.map((e,i)=>`<div class="diary-entry" id="de${i}"><div class="de-head" onclick="document.getElementById('de${i}').classList.toggle('open')"><div class="de-date">${e.date}</div><div class="de-preview">${e.text.slice(0,34).replace(/\n/g,' ')}...</div><div class="de-mood">${e.mood}</div></div><div class="de-body"><pre>${e.text}</pre><div style="margin-top:.72rem;"><button class="save-chip" onclick="delDiary(${i})" style="color:var(--red);">删除</button></div></div></div>`).join('');}
+function delDiary(i){if(!confirm('确认删除？'))return;S.diary.splice(i,1);save();renderDiary();}
+function updateSettingsStats(){const el=document.getElementById('settings-stats');if(el)el.innerHTML=`复习卡片：${S.cards.length} 张<br>已掌握：${S.cards.filter(c=>c.interval>=21).length} 张<br>日记：${S.diary.length} 篇<br>连续学习：${S.streak||1} 天<br>邮箱：${S.user}`;}
+
+function showOverlay(on,msg){document.getElementById('overlay').classList.toggle('on',on);if(msg)document.getElementById('overlay-msg').textContent=msg;}
+let toastT;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),3000);}
+
+load();
+if(S.user){const today=new Date().toDateString();if(S.lastStudy!==today){const yd=new Date(Date.now()-86400000).toDateString();S.streak=S.lastStudy===yd?(S.streak||0)+1:1;S.lastStudy=today;save();}bootApp();}
+</script>
+</body>
+</html>
